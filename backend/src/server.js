@@ -7,6 +7,7 @@ import rateLimit from 'express-rate-limit';
 
 import expenseRoutes from './routes/expenseRoutes.js';
 import userRoutes from './routes/authRoutes.js';
+import predictRoutes from './routes/predictRoutes.js';
 import { connectDB } from './config/db.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
 
@@ -34,6 +35,7 @@ app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: Date.now() 
 
 app.use("/api/expenses", expenseRoutes);
 app.use('/auth', userRoutes)
+app.use('/api/predict', predictRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
