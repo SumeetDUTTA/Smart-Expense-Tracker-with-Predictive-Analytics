@@ -16,10 +16,21 @@ const expenseSchema = new mongoose.Schema({
         type: String,
         required: true,
         enum: [
-            'Food', 'Transport', 'Utilities',
-            'Entertainment', 'Healthcare', "Clothing",
-            'Education', 'Pets', 'Personal Care',
-            'Gifts & Donations', 'Housing', 'Other'
+            // Categories matching the ML training data exactly
+            'Food & Drink',      // was 'Food'
+            'Travel',            // was 'Transport' 
+            'Utilities',
+            'Entertainment',
+            'Health & Fitness',  // was 'Healthcare'
+            'Shopping',          // was missing
+            'Rent',              // was 'Housing'
+            'Other',
+            // Additional categories for comprehensive expense tracking
+            'Salary',            // Income/expense category from training data
+            'Investment',        // Income/expense category from training data
+            'Clothing',          // Keep for user convenience
+            'Education',         // Keep for user convenience
+            'Personal Care',     // Keep for user convenience
         ],
         default: 'Other',
         trim: true,

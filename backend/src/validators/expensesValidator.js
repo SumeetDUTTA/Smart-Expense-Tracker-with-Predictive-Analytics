@@ -3,12 +3,66 @@ import z from "zod";
 const createExpenseSchema = z.object({
     body: z.object({
         amount: z.number().positive(),
-        category: z.enum([
-            'Food', 'Transport', 'Utilities',
-            'Entertainment', 'Healthcare', "Clothing",
-            'Education', 'Pets', 'Personal Care',
-            'Gifts & Donations', 'Housing', 'Other'
-        ]),
+        category: z.string().refine((val) => {
+            const validCategories = [
+                'Food & Drink',
+                'Travel',
+                'Utilities',
+                'Entertainment',
+                'Health & Fitness',
+                'Shopping',
+                'Rent',
+                'Other',
+                'Salary',
+                'Investment',
+                'Clothing',
+                'Education',
+                'Personal Care'
+            ];
+            
+            // Backward compatibility mapping
+            const categoryMapping = {
+                'Food': 'Food & Drink',
+                'Transport': 'Travel',
+                'Healthcare': 'Health & Fitness',
+                'Housing': 'Rent'
+            };
+            
+            const trimmedVal = val.trim();
+            
+            // Check if it's a valid new category or a mappable old category
+            const isValidNew = validCategories.includes(trimmedVal);
+            const isValidOld = categoryMapping.hasOwnProperty(trimmedVal);
+            
+            return isValidNew || isValidOld;
+        }, {
+            message: `Invalid category. Must be one of: ${[
+                'Food & Drink',
+                'Travel',
+                'Utilities',
+                'Entertainment',
+                'Health & Fitness',
+                'Shopping',
+                'Rent',
+                'Other',
+                'Salary',
+                'Investment',
+                'Clothing',
+                'Education',
+                'Personal Care'
+            ].join(', ')} (or legacy names: Food, Transport, Healthcare, Housing)`
+        }).transform((val) => {
+            const categoryMapping = {
+                'Food': 'Food & Drink',
+                'Transport': 'Travel',
+                'Healthcare': 'Health & Fitness',
+                'Housing': 'Rent'
+            };
+            
+            const trimmedVal = val.trim();
+            // Map old category names to new ones
+            return categoryMapping[trimmedVal] || trimmedVal;
+        }),
         date: z.coerce.date().optional(),
         note: z.string().max(500).optional().default(''),
     }),
@@ -19,12 +73,66 @@ const createExpenseSchema = z.object({
 const updateExpenseSchema = z.object({
     body: z.object({
         amount: z.number().positive().optional(),
-        category: z.enum([
-            'Food', 'Transport', 'Utilities',
-            'Entertainment', 'Healthcare', "Clothing",
-            'Education', 'Pets', 'Personal Care',
-            'Gifts & Donations', 'Housing', 'Other'
-        ]),
+        category: z.string().refine((val) => {
+            const validCategories = [
+                'Food & Drink',
+                'Travel',
+                'Utilities',
+                'Entertainment',
+                'Health & Fitness',
+                'Shopping',
+                'Rent',
+                'Other',
+                'Salary',
+                'Investment',
+                'Clothing',
+                'Education',
+                'Personal Care'
+            ];
+            
+            // Backward compatibility mapping
+            const categoryMapping = {
+                'Food': 'Food & Drink',
+                'Transport': 'Travel',
+                'Healthcare': 'Health & Fitness',
+                'Housing': 'Rent'
+            };
+            
+            const trimmedVal = val.trim();
+            
+            // Check if it's a valid new category or a mappable old category
+            const isValidNew = validCategories.includes(trimmedVal);
+            const isValidOld = categoryMapping.hasOwnProperty(trimmedVal);
+            
+            return isValidNew || isValidOld;
+        }, {
+            message: `Invalid category. Must be one of: ${[
+                'Food & Drink',
+                'Travel',
+                'Utilities',
+                'Entertainment',
+                'Health & Fitness',
+                'Shopping',
+                'Rent',
+                'Other',
+                'Salary',
+                'Investment',
+                'Clothing',
+                'Education',
+                'Personal Care'
+            ].join(', ')} (or legacy names: Food, Transport, Healthcare, Housing)`
+        }).transform((val) => {
+            const categoryMapping = {
+                'Food': 'Food & Drink',
+                'Transport': 'Travel',
+                'Healthcare': 'Health & Fitness',
+                'Housing': 'Rent'
+            };
+            
+            const trimmedVal = val.trim();
+            // Map old category names to new ones
+            return categoryMapping[trimmedVal] || trimmedVal;
+        }).optional(),
         date: z.coerce.date().optional(),
         note: z.string().max(500).optional(),
     }),
