@@ -49,7 +49,7 @@ export async function predict(req, res, next) {
             }
         }
 
-        // Simple check: if we have at least 3 months of data, use ML; otherwise use simple average
+        // Simple check: if I have at least 3 months of data, use ML; otherwise use simple average
         const MIN_MONTHS = 3;
         let result;
 
