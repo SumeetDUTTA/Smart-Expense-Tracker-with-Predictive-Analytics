@@ -1,72 +1,94 @@
 import axios from 'axios';
-import ApiError from '../utils/ApiError.js';
 
-// Simple fallback: repeat mean when ML is unavailable or returns invalid data
-function fallbackMean(timeseries, horizon) {
-    const numeric = (Array.isArray(timeseries) ? timeseries : [])
-        .map(n => Number(n))
-        .filter(n => Number.isFinite(n));
-    const mean = numeric.length ? numeric.reduce((a, b) => a + b, 0) / numeric.length : 0;
-    return Array.from({ length: horizon }, () => Math.round(mean));
+const base = process.env.ML_API_URL || 'http://localhost:8000';
+
+// Simple helper function
+function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
 }
 
-// Basic input sanitation to avoid NaN/undefined leaking to API
-function sanitizeTimeseries(timeseries) {
-    if (!Array.isArray(timeseries)) return [];
-    return timeseries
-        .map(n => Number(n))
-        .filter(n => Number.isFinite(n) && n >= 0);
+// Simple recent mean calculation
+function recentMean(series, window = 6) {
+    if (!Array.isArray(series) || series.length === 0) return 0;
+    const tail = series.slice(-window);
+    const nonZero = tail.filter(n => n > 0);
+    const use = nonZero.length ? nonZero : tail;
+    return use.length ? use.reduce((a, b) => a + b, 0) / use.length : 0;
 }
 
-async function forecast(timeseries, horizonDates) {
-    const base = process.env.ML_API_BASE_URL;
-
-    // Validate inputs early
-    const horizon = Number(horizonDates);
-    if (!Number.isInteger(horizon) || horizon <= 0) {
-        throw new ApiError(400, 'Invalid horizon (must be a positive integer)');
-    }
-    const ts = sanitizeTimeseries(timeseries);
-
-    // No ML API configured → fallback
-    if (!base) {
-        return fallbackMean(ts, horizon);
-    }
-
-    try {
-        const url = `${base.replace(/\/$/, '')}/predict`;
-        const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
-        if (process.env.ML_API_KEY) headers['x-api-key'] = process.env.ML_API_KEY;
-
-        // API contract (from ml_api.py TimeseriesData): { timeseries: number[], horizon: number }
-        const { data } = await axios.post(
-            url,
-            { timeseries: ts, horizon },
-            { headers, timeout: 10000 }
-        );
-
-        // Server-side error shape: { error: string, predicted_expense_rupees: [...] }
-        if (data?.error) {
-            return fallbackMean(ts, horizon);
-        }
-
-        // Expected: { predicted_expense_rupees: number[] }
-        const raw = Array.isArray(data?.predicted_expense_rupees) ? data.predicted_expense_rupees : null;
-        if (!raw || raw.length === 0) {
-            return fallbackMean(ts, horizon);
-        }
-
-        // Ensure length/horizon match; if API returns extra/short values, normalize
-        const predictions = Array.from({ length: horizon }, (_, i) => {
-            const val = raw[i] ?? raw[raw.length - 1] ?? 0;
-            return Math.max(0, Math.round(Number(val) || 0));
+// Simple statistical fallback
+function statisticalFallback(categories, horizon = 1) {
+    const results = {};
+    let totalPredictions = [];
+    
+    for (const [cat, series] of Object.entries(categories)) {
+        const mean = recentMean(series, 6);
+        const growth = 1.02; // 2% modest growth
+        const predictions = Array(horizon).fill(0).map(() => Math.round(mean * growth));
+        results[cat] = predictions;
+        
+        predictions.forEach((val, i) => {
+            totalPredictions[i] = (totalPredictions[i] || 0) + val;
         });
+    }
+    
+    return {
+        categories: results,
+        total: totalPredictions,
+        predictionMethod: 'statistical_fallback'
+    };
+}
 
-        return predictions;
+// Main prediction function - SIMPLIFIED
+export async function forecast(categories, h = 1) {
+    console.log('🤖 Starting ML prediction...');
+    
+    try {
+        // Try ML prediction first
+        const url = `${base.replace(/\/$/, '')}/predict`;
+        const { data: response } = await axios.post(url, { categories, horizon: h }, {
+            timeout: 10000,
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        console.log('✅ ML prediction successful!');
+        
+        // Simple processing - just clean up the ML results
+        const cleanCats = {};
+        const recomputedTotal = [];
+        
+        for (const [cat, vals] of Object.entries(response.categories || {})) {
+            const predicted = Array.isArray(vals) ? vals.map(Number) : [];
+            if (predicted.length === 0) {
+                cleanCats[cat] = [];
+                continue;
+            }
+            
+            // Simple approach: trust the ML model with basic bounds
+            const rawMean = predicted.reduce((a, b) => a + b, 0) / predicted.length;
+            console.log(`📊 ${cat}: ML predicted ₹${Math.round(rawMean)}/month`);
+            
+            // Just ensure values are positive and reasonable (not more than 50K per category)
+            const cleaned = predicted.map(v => clamp(Math.round(v), 0, 50000));
+            cleanCats[cat] = cleaned;
+            
+            cleaned.forEach((v, i) => {
+                recomputedTotal[i] = (recomputedTotal[i] || 0) + v;
+            });
+        }
+        
+        const totalAvg = recomputedTotal.reduce((a, b) => a + b, 0) / recomputedTotal.length;
+        console.log(`💰 Total predicted: ₹${Math.round(totalAvg)}/month`);
+        
+        return {
+            categories: cleanCats,
+            total: recomputedTotal,
+            predictionMethod: 'ml_model'
+        };
+        
     } catch (err) {
-        // Network/timeout/axios error → fallback
-        return fallbackMean(ts, horizon);
+        console.log(`❌ ML prediction failed: ${err.message} - using statistical fallback`);
+        return statisticalFallback(categories, h);
     }
 }
 
-export default forecast;
