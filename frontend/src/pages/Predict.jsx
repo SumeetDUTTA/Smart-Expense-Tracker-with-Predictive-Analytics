@@ -1,0 +1,171 @@
+import React, {useState} from "react";
+import api from "../api";
+import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
+
+function normalizeTotalPrediction(tp) {
+	if (!Array.isArray(tp)) return tp;
+	if (typeof tp === 'number') return [tp];
+	if (tp && typeof tp === 'object') {
+		const keys = Object.keys(tp);
+		const numericKyes = keys.every(k => !Number.isNaN(Date.parse(k)) || !isNaN(Number(k)));
+		if (numericKyes) {
+			return keys.slice()
+				.sort((a, b) => {
+					const da = Date.parse(a);
+					const db = Date.parse(b);
+					if (!Number.isNaN(da) && !Number.isNaN(db)) return da - db
+					return (Number(a) || 0) - (Number(b) || 0)
+				})
+				.map(k => tp[k]);
+		}
+		return Object.values(tp);
+	}
+	return [];
+}
+
+export default function Predict(){
+	const [horizon, setHorizon] = useState(1);
+	const [result, setResult] = useState(null);
+	const [error, setError] = useState(null);
+	const [loading, setLoading] = useState(false);
+	const [showBreakdown, setShowBreakdown] = useState(false);
+
+	async function submit(event) {
+		event && event.preventDefault();
+		setLoading(true);
+		setError(null);
+		try {
+			const res = await api.post("/predict", {horizonDates: Number(horizon)});
+			setResult(res.data);
+		} catch (error) {
+			setError(error.response?.data?.message || "Prediction failed");
+		} finally {
+			setLoading(false);
+		}
+	}
+
+	const totalPredRaw = result?.total_prediction;
+	const totalPredArray = normalizeTotalPrediction(totalPredRaw);
+
+	const chartData = totalPredArray.map((v, i) => ({ 
+		name: `T+${i + 1}`,
+		value: v 
+		})
+	);
+
+	const totalDisplay = Array.isArray(totalPredRaw) && totalPredArray.length > 0
+		? totalPredArray.reduce((s, x) => s + (Number(x) || 0), 0)
+		: typeof totalPredRaw === 'number' ? totalPredRaw : null;
+	
+	const byCategory = result?.prediction_by_category || {};
+
+	return (
+		<div>
+			<h2 className="text-xl font-semibold">Prediction</h2>
+
+			<form onSubmit={submit} className="flex items-center gap-2 mb-4">
+				<label>Horizon (months):</label>
+				<input
+					type="number"
+					min="1"
+					max="12"
+					value={horizon}
+					onChange={(e) => setHorizon(e.target.value)}
+					className="p-2 border rounded w-20"
+				/>
+				<button className="bg-indigo-600 text-white px-3 py-1 rounded">Run</button>
+			</form>
+
+			{loading && <div>Generating…</div>}
+			{error && <div className="text-red-600">{error}</div>}
+
+			{result && (
+				<div className="space-y-4">
+					{/* Summary card with total */}
+					<div className="bg-white p-4 rounded shadow flex items-center justify-between">
+						<div>
+							<div className="text-sm text-gray-500">Total prediction</div>
+							<div className="text-2xl font-bold mt-1">
+								{totalDisplay != null ? `₹${totalDisplay}` : '—'}
+							</div>
+						</div>
+
+						<div className="w-2/3 h-48">
+							{chartData.length > 0 ? (
+								<ResponsiveContainer width="100%" height="100%">
+									<LineChart data={chartData}>
+										<CartesianGrid strokeDasharray="3 3" />
+										<XAxis dataKey="name" />
+										<YAxis />
+										<Tooltip />
+										<Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} />
+									</LineChart>
+								</ResponsiveContainer>
+							) : (
+								<div className="flex items-center justify-center h-full text-gray-500">
+									Chart not available
+								</div>
+							)}
+						</div>
+					</div>
+
+					{/* Toggle for breakdown by category */}
+					<div className="flex items-center gap-2">
+						<button
+							onClick={() => setShowBreakdown(s => !s)}
+							className="text-sm bg-gray-100 px-3 py-1 rounded"
+						>
+							{showBreakdown ? 'Hide breakdown by category' : 'Show breakdown by category'}
+						</button>
+
+						{/* Optional: a small note explaining hidden method & data privacy */}
+						<div className="text-sm text-gray-500">
+							Breakdown is hidden by default. Click the button to view category-level predictions.
+						</div>
+					</div>
+
+					{/* Breakdown table (hidden until user requests it) */}
+					{showBreakdown && (
+						<div className="bg-white p-4 rounded shadow">
+							<h3 className="font-medium mb-2">Prediction by category</h3>
+
+							<div className="overflow-auto">
+								<table className="w-full text-left mt-2">
+									<thead className="bg-gray-100">
+										<tr>
+											<th className="p-2">Category</th>
+											{/* Use chartData length (if available) else show single T+1 */}
+											{(chartData.length > 0
+												? chartData
+												: [{ name: `T+${1}` }]
+											).map(c => (
+												<th key={c.name} className="p-2">{c.name}</th>
+											))}
+										</tr>
+									</thead>
+
+									<tbody>
+										{Object.keys(byCategory).length === 0 ? (
+											<tr className="border-t"><td className="p-2" colSpan={2}>No category predictions</td></tr>
+										) : (
+											Object.entries(byCategory).map(([cat, arr]) => (
+												<tr key={cat} className="border-t">
+													<td className="p-2">{cat}</td>
+													{Array.isArray(arr) ? (
+														arr.map((v, i) => <td key={i} className="p-2">₹{v}</td>)
+													) : (
+														<td className="p-2"> {String(arr)} </td>
+													)}
+												</tr>
+											))
+										)}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					)}
+				</div>
+			)}
+		</div>
+	)
+}

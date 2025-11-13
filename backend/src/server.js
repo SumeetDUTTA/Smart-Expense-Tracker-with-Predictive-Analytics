@@ -24,7 +24,7 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined': 'dev' ));
 
-const corsOrigin = [process.env.CORS_ORIGIN, 'https://yourfrontend.com'];
+const corsOrigin = [process.env.CORS_ORIGIN] || '*';
 app.use(cors({ origin: corsOrigin, credentials: true }));
 
 const limiter = rateLimit({
@@ -47,8 +47,6 @@ const authLimiter = rateLimit({
   max: 5,
   message: { error: 'Too many login attempts. Please try again later.' }
 });
-
-app.use('/api/', limiter);
 
 app.get('/health', async (req, res) => {
   try {
