@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+/* eslint-disable no-unused-vars */
 import React, {createContext, useContext, useState, useEffect} from "react";
 import api from "../api";
 

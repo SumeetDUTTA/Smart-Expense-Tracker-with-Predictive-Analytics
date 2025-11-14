@@ -1,105 +1,29 @@
-// eslint.config.js
-// Flat ESLint config suitable for JS/React and TypeScript projects.
-// Adjust plugins/extensions as needed for your project.
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import { defineConfig, globalIgnores } from 'eslint/config'
 
-module.exports = [
-    {
-        ignores: ['node_modules/**', 'dist/**', 'build/**', '.git/**'],
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{js,jsx}'],
+    extends: [
+      js.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        ecmaFeatures: { jsx: true },
+        sourceType: 'module',
+      },
     },
-
-    // JavaScript / JSX
-    {
-        files: ['**/*.js', '**/*.cjs', '**/*.mjs', '**/*.jsx'],
-        languageOptions: {
-            ecmaVersion: 2022,
-            sourceType: 'module',
-            parserOptions: {
-                ecmaVersion: 2022,
-                sourceType: 'module',
-                ecmaFeatures: { jsx: true },
-            },
-            globals: {
-                window: 'readonly',
-                document: 'readonly',
-                navigator: 'readonly',
-                process: 'readonly',
-            },
-        },
-        plugins: {
-            react: require('eslint-plugin-react'),
-            'react-hooks': require('eslint-plugin-react-hooks'),
-            'jsx-a11y': require('eslint-plugin-jsx-a11y'),
-            import: require('eslint-plugin-import'),
-            prettier: require('eslint-plugin-prettier'),
-        },
-        settings: {
-            react: { version: 'detect' },
-            'import/resolver': { node: { extensions: ['.js', '.jsx', '.ts', '.tsx'] } },
-        },
-        rules: {
-            'prettier/prettier': 'error',
-            'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-            'no-console': ['warn', { allow: ['warn', 'error'] }],
-            'import/no-unresolved': 'error',
-            'react/prop-types': 'off',
-            'react/jsx-uses-react': 'off',
-            'react/react-in-jsx-scope': 'off',
-            'react-hooks/rules-of-hooks': 'error',
-            'react-hooks/exhaustive-deps': 'warn',
-            'jsx-a11y/anchor-is-valid': 'warn',
-        },
+    rules: {
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
-
-    // TypeScript / TSX
-    {
-        files: ['**/*.ts', '**/*.tsx'],
-        languageOptions: {
-            parser: require('@typescript-eslint/parser'),
-            parserOptions: {
-                ecmaVersion: 2022,
-                sourceType: 'module',
-                project: './tsconfig.json',
-                ecmaFeatures: { jsx: true },
-            },
-        },
-        plugins: {
-            '@typescript-eslint': require('@typescript-eslint/eslint-plugin'),
-            react: require('eslint-plugin-react'),
-            'react-hooks': require('eslint-plugin-react-hooks'),
-            'jsx-a11y': require('eslint-plugin-jsx-a11y'),
-            import: require('eslint-plugin-import'),
-            prettier: require('eslint-plugin-prettier'),
-        },
-        settings: {
-            react: { version: 'detect' },
-            'import/resolver': {
-                typescript: { project: './tsconfig.json' },
-            },
-        },
-        rules: {
-            'prettier/prettier': 'error',
-            'no-unused-vars': 'off',
-            '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-            '@typescript-eslint/explicit-module-boundary-types': 'off',
-            '@typescript-eslint/no-explicit-any': 'off',
-            'import/no-unresolved': 'off', // handled by TS resolver
-            'react/jsx-uses-react': 'off',
-            'react/react-in-jsx-scope': 'off',
-            'react-hooks/rules-of-hooks': 'error',
-            'react-hooks/exhaustive-deps': 'warn',
-        },
-    },
-
-    // Node scripts / config files
-    {
-        files: ['**/*.cjs', 'scripts/**', '.eslintrc.*'],
-        languageOptions: {
-            ecmaVersion: 2021,
-            sourceType: 'script',
-            globals: { require: 'readonly', module: 'readonly' },
-        },
-        rules: {
-            'no-console': 'off',
-        },
-    },
-];
+  },
+])
