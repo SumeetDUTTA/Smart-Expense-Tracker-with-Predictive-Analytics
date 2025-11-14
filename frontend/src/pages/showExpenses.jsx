@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Brush } from 'recharts'
 import toast from 'react-hot-toast'
 
-import api from '../api'
+import api from '../lib/api'
 import ExpenseForm from '../components/expenseForm'
 
 /* ---------- Helpers (same as ExpenseHistory) ---------- */

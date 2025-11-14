@@ -7,13 +7,13 @@ export const updateUserMetaSchema = z.object({
             .min(0, 'Monthly budget must be a positive number')
             .max(1000000, 'Monthly budget seems too high')
             .optional(),
-        user_type: z.enum([
-            'college_student', 
-            'working_professional', 
-            'family_oriented', 
-            'high_earner', 
-            'budget_conscious', 
-            'social_spender'
+        userType: z.enum([
+            'college_student',
+            'young_professional',
+            'family_moderate',
+            'family_high',
+            'luxury_lifestyle',
+            'senior_retired'
         ]).optional(),
         firstName: z.string()
             .min(1, 'First name is required')

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Wallet, TrendingUp, BarChart3, User, LogOut, LogIn, UserPlus } from "lucide-react";
+import { Home, Wallet, TrendingUp, BarChart3, User, LogOut, LogIn, UserPlus, Plus } from "lucide-react";
 
 import { useAuth } from "../contexts/authContext.jsx";
 
@@ -14,8 +14,9 @@ export default function NavBar() {
 	const navLinks = [
 		{ path: "/", icon: Home, label: "Dashboard" },
 		{ path: "/expenses", icon: Wallet, label: "Expenses" },
-		{ path: "/expense-history", icon: BarChart3, label: "History" },
+		{path: "/add-expense", icon: Plus, label: "Add Expense"},
 		{ path: "/predict", icon: TrendingUp, label: "Predict" },
+		{path: "/profile", icon: User, label: "Profile"},
 	];
 
 	return (
@@ -53,7 +54,7 @@ export default function NavBar() {
 					<div className="flex items-center gap-4">
 						{token ? (
 							<>
-								<Link to="/expenses" className="btn btn-primary flex items-center gap-1">
+								<Link to="/add-expense" className="btn btn-primary flex items-center gap-1">
 									<Plus className="size-5" />
 									<span>New Expense</span>
 								</Link>

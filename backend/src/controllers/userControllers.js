@@ -6,9 +6,10 @@ async function getProfile(req, res, next) {
         if (!req.user || !req.user._id) {
             return next(new errorHandler(401, 'Unauthorized'));
         }
-        const user = req.user;
-        if (!user.monthlyBudget && !user.userType) {
-            user = await User.findById(user._id).select('-password');
+        // Always fetch fresh user data from database
+        const user = await User.findById(req.user._id).select('-password');
+        if (!user) {
+            return next(new errorHandler(404, 'User not found'));
         }
         return res.status(200).json({ success: true, user });
     } catch (error) {

@@ -41,6 +41,7 @@ async function updateUserMeta(req, res, next) {
         const updateUser = await User.findByIdAndUpdate(
             userId, {$set: update}, { new: true }
         ).select('-password');
+        
         if (!updateUser) return next(notFound(404, 'User not found'));
         return res.status(200).json({ success: true, message: 'User updated successfully', user: updateUser });
 

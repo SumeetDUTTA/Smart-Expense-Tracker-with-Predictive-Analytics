@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import api from "../api";
+import api from "../lib/api";
 import { TrendingUp, TrendingDown, Wallet, Calendar, ArrowRight, PieChart, DollarSign, Target, Activity } from "lucide-react";
 import { PieChart as RechartsPie, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, BarChart, Bar } from "recharts";
 import toast from "react-hot-toast";
@@ -121,7 +121,7 @@ export default function Dashboard() {
 					<h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">Dashboard</h1>
 					<p className="text-base-content/60 mt-1">Welcome back! Here's your comprehensive spending overview</p>
 				</div>
-				<Link to="/expenses" className="btn btn-gradient gap-2 shadow-lg">
+				<Link to="/add-expense" className="btn btn-gradient gap-2 shadow-lg">
 					<Wallet size={20} />
 					Add Expense
 				</Link>
@@ -369,7 +369,7 @@ export default function Dashboard() {
 							)}
 						</div>
 
-						<Link to="/expense-history" className="btn btn-outline btn-primary mt-4 w-full">
+						<Link to="/expenses" className="btn btn-outline btn-primary mt-4 w-full">
 							View Detailed Analytics
 						</Link>
 					</div>
@@ -381,14 +381,14 @@ export default function Dashboard() {
 				<div className="card-body">
 					<h2 className="card-title mb-4">Quick Actions</h2>
 					<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-						<Link to="/expenses" className="btn btn-outline gap-2">
-							<Wallet size={20} />
-							Add Expense
-						</Link>
-						<Link to="/expense-history" className="btn btn-outline gap-2">
-							<PieChart size={20} />
-							View History
-						</Link>
+					<Link to="/add-expense" className="btn btn-outline gap-2">
+						<Wallet size={20} />
+						Add Expense
+					</Link>
+					<Link to="/expenses" className="btn btn-outline gap-2">
+						<PieChart size={20} />
+						View History
+					</Link>
 						<Link to="/predict" className="btn btn-outline gap-2">
 							<TrendingUp size={20} />
 							Predictions

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/authContext";
-import api from "../api";
+import api from "../lib/api";
 import { User, Mail, Wallet, Settings, Save } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -37,12 +37,10 @@ export default function Profile() {
 	}
 
 	useEffect(() => {
+		// Fetch profile on mount or when user changes
 		if (user) {
-			setProfile(user);
-			setMonthlyBudget(user.monthlyBudget || "");
-			setUserType(user.userType || "");
+			fetchProfile();
 		}
-		fetchProfile();
 	}, [user]);
 
 	async function updateBudget(e) {
@@ -65,10 +63,13 @@ export default function Profile() {
 
 			const res = await api.patch("/user/meta", payload);
 
-			if (res.data.success) {
+			if (res.data.success && res.data.user) {
 				toast.success("Profile updated successfully!");
+				// Update profile with the returned user data
+				setProfile(res.data.user);
+				setMonthlyBudget(res.data.user.monthlyBudget || "");
+				setUserType(res.data.user.userType || "");
 				setEditing(false);
-				fetchProfile();
 			}
 		} catch (error) {
 			console.error("Update error:", error);
@@ -196,14 +197,14 @@ export default function Profile() {
 
 							{/* User Type */}
 							<div className="w-full">
-								<label className="block text-sm font-medium mb-2">
-									Account Type
-								</label>
-								<select
-									value={userType}
-									onChange={(e) => setUserType(e.target.value)}
-									className="select select-bordered select-lg w-full"
-								>
+							<label className="block text-sm font-medium mb-2">
+								Account Type
+							</label>
+							<select
+								value={userType}
+								onChange={(e) => setUserType(e.target.value)}
+								className="select select-bordered select-lg w-full"
+							>
 									<option value="">Select Account Type</option>
 									{allowedUserTypes.map((type) => (
 										<option key={type.value} value={type.value}>
