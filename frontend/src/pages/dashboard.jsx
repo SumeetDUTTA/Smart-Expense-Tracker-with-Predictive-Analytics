@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
 	TrendingUp, TrendingDown, Wallet, Calendar, ArrowRight,
-	PieChart as PieIcon, DollarSign, Target, LoaderIcon, Plus
+	PieChart as PieIcon, DollarSign, Target, Plus,
+	LoaderCircle
 } from "lucide-react";
 
 import {
@@ -180,7 +181,7 @@ export default function Dashboard() {
 		return (
 			<div className="loader-screen" role="status" aria-live="polite">
 				<div style={{ textAlign: 'center' }}>
-					<LoaderIcon size={48} className="animate-spin" />
+					<LoaderCircle size={48} className="animate-spin" />
 					<div style={{ marginTop: 8, color: 'var(--muted)' }}>Loading dashboard…</div>
 				</div>
 			</div>

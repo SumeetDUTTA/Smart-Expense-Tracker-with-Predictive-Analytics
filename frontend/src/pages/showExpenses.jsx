@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Brush } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Brush, } from 'recharts'
+import { LoaderCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 import api from '../lib/api'
@@ -204,6 +205,17 @@ export default function ShowExpenses() {
     const cats = Array.from(new Set(list.map(i => i.category).filter(Boolean)))
     return ['All', ...cats]
   }, [list])
+
+  if (loading) {
+		return (
+			<div className="loader-screen" role="status" aria-live="polite">
+				<div style={{ textAlign: 'center' }}>
+					<LoaderCircle size={48} className="animate-spin" />
+					<div style={{ marginTop: 8, color: 'var(--muted)' }}>Loading Expenses…</div>
+				</div>
+			</div>
+		);
+	}
 
   /* ---------- UI ---------- */
   return (

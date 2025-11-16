@@ -35,6 +35,22 @@
   flex-direction: column;
 }
 
+.loader-screen {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.animate-spin {
+    animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 /* Header */
 .header {
   display: flex;
@@ -408,6 +424,7 @@
   .search-category-dropdown { font-size: 13px; padding: 9px; }
   .buttons-edit, .buttons-delete { min-width: 64px; padding: 6px 6px; }
   .chart-container { min-height: 160px; }
+
 }
 
 /* Extra polish: interactive focus states */

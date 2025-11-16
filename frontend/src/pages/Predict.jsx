@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import api from "../lib/api";
-import { TrendingUp, Calendar, DollarSign, BarChart3, Eye, EyeOff, Sparkles, LoaderIcon } from "lucide-react";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { TrendingUp, Calendar, DollarSign, BarChart3, Eye, EyeOff, Sparkles, LoaderCircle } from "lucide-react";
+import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 import toast from "react-hot-toast";
+
+import api from "../lib/api";
+import "../styles/Predict.css"; // Replace with the provided CSS below
 
 function normalizeTotalPrediction(tp) {
 	try {
@@ -27,7 +29,7 @@ function normalizeTotalPrediction(tp) {
 	} catch (err) {
 		console.error('normalizeTotalPrediction error:', err, tp)
 	}
-	return [] // <-- GUARANTEED fallback
+	return []
 }
 
 export default function Predict() {
@@ -43,8 +45,10 @@ export default function Predict() {
 		setError(null)
 		try {
 			const res = await api.post('/predict', { horizonDates: Number(horizon) })
-			console.log('predict response:', res.data)
 			setResult(res.data)
+			console.log('API result:', res.data);
+			console.log('total_prediction (raw):', res.data?.total_prediction);
+			console.log('prediction_by_category (raw):', res.data?.prediction_by_category);
 			setShowBreakdown(false)
 			toast.success('Prediction generated successfully!')
 		} catch (e) {
@@ -57,7 +61,6 @@ export default function Predict() {
 		}
 	}
 
-	// Defensive normalization with try/catch/fallback
 	const totalPredRaw = result?.total_prediction
 	let totalPredArray = []
 	try {
@@ -67,241 +70,239 @@ export default function Predict() {
 		totalPredArray = []
 	}
 
-	// ALWAYS use a safe array fallback before .map
-	const chartData = (totalPredArray || []).map((v, i) => ({ name: `T+${i + 1}`, value: v }))
-
 	const totalDisplay = (Array.isArray(totalPredArray) && totalPredArray.length > 0)
 		? totalPredArray.reduce((s, x) => s + (Number(x) || 0), 0)
 		: (typeof totalPredRaw === 'number' ? totalPredRaw : null)
 
 	const byCategory = result?.prediction_by_category || {}
 
-	if (loading) {
-		return <div className='min-h-screen bg-base-200 flex items-center justify-center'>
-			<LoaderIcon className='size-10 animate-spin text-primary' />
-		</div>
+	const horizonCount = Math.max(1, Number(horizon || 1));
+
+	// Always create labelDates sized to horizonCount (T+1 => next calendar month)
+	const labelDates = Array.from({ length: horizonCount }).map((_, i) => {
+		const d = new Date();
+		d.setMonth(d.getMonth() + (i + 1)); // T+1 = next calendar month
+		return {
+			monthName: new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric' }).format(d),
+			monthLabel: `Month ${i + 1}`
+		};
+	});
+	let chartData = [];
+
+	if (Array.isArray(totalPredArray) && totalPredArray.length >= horizonCount) {
+		chartData = totalPredArray.slice(0, horizonCount).map((v, i) => ({
+			name: labelDates[i].monthName,
+			value: Number(v) || 0
+		}));
+	} else {
+		const cats = Object.values(byCategory || {}).filter(Array.isArray);
+		if (cats.length > 0) {
+			chartData = Array.from({ length: horizonCount }).map((_, idx) => {
+				const sum = cats.reduce((s, arr) => s + (Number(arr[idx]) || 0), 0);
+				return { name: labelDates[idx].monthName, value: sum };
+			});
+		} else if (Array.isArray(totalPredArray) && totalPredArray.length > 0) {
+			chartData = Array.from({ length: horizonCount }).map((_, idx) => ({
+				name: labelDates[idx].monthName,
+				value: Number(totalPredArray[idx] || 0)
+			}));
+		} else if (typeof totalPredRaw === 'number') {
+			chartData = Array.from({ length: horizonCount }).map((_, idx) => ({
+				name: labelDates[idx].monthName,
+				value: idx === 0 ? Number(totalPredRaw) || 0 : 0
+			}));
+		} else {
+			chartData = [];
+		}
 	}
 
 	return (
-		<div className="space-y-6 animate-fade-in">
+		<div className="predict-page-container">
 			{/* Header */}
-			<div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-				<div>
-					<h2 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">Expense Prediction</h2>
-					<p className="text-base-content/60 mt-1">AI-powered forecasting for your future expenses</p>
-				</div>
-			</div>
-
-			{/* Prediction Form */}
-			<div className="card bg-base-100 shadow-xl card-hover border border-base-300">
-				<div className="card-body">
-					<h3 className="card-title text-xl mb-4 flex items-center gap-2">
-						<Sparkles className="text-primary" size={24} />
-						Generate Prediction
-					</h3>
-
-					<form onSubmit={submit} className="space-y-4">
-						<div className="form-control">
-							<label className="label">
-								<span className="label-text font-medium flex items-center gap-2">
-									<Calendar size={18} />
-									Forecast Horizon (months)
-								</span>
-							</label>
-							<div className="flex gap-4 items-center">
-								<input
-									type="range"
-									min="1"
-									max="12"
-									value={horizon}
-									onChange={(e) => setHorizon(e.target.value)}
-									className="range range-primary flex-1"
-									step="1"
-								/>
-								<div className="bg-primary/10 px-6 py-3 rounded-lg min-w-[80px] text-center">
-									<span className="text-2xl font-bold text-primary">{horizon}</span>
-									<span className="text-xs text-base-content/60 block">months</span>
-								</div>
-							</div>
-							<div className="flex justify-between text-xs text-base-content/60 mt-1 px-2">
-								<span>1 month</span>
-								<span>6 months</span>
-								<span>12 months</span>
-							</div>
-						</div>
-
-						<button
-							type="submit"
-							className={`btn btn-gradient w-full gap-2 shadow-lg ${loading ? 'loading' : ''}`}
-							disabled={loading}
-						>
-							{!loading && <TrendingUp size={20} />}
-							{loading ? 'Generating Prediction...' : 'Generate Prediction'}
-						</button>
-					</form>
-				</div>
-			</div>
-
-			{/* Loading State */}
-			{loading && (
-				<div className="card bg-base-100 shadow-xl animate-pulse">
-					<div className="card-body items-center text-center py-16">
-						<span className="loading loading-spinner loading-lg text-primary"></span>
-						<p className="text-base-content/60 mt-4">Analyzing your spending patterns...</p>
+			<header className="predict-page-header card-surface">
+				<div className="header-left">
+					<div className="title-wrap">
+						<h1 className="page-title">Expense Prediction</h1>
+						<p className="page-description">AI-powered forecast based on your historic expenses</p>
 					</div>
 				</div>
-			)}
+				<div className="header-actions">
+					<button className="btn ghost" onClick={() => { setResult(null); setError(null); }} title="Clear results">Clear</button>
+				</div>
+			</header>
 
-			{/* Error State */}
+			{/* Form + CTA */}
+			<section className="form-grid page-card-container">
+				<form onSubmit={submit} className="card-body form-card">
+					<div className="form-row">
+						<label className="label" htmlFor="horizon">
+							<Calendar size={16} />
+							<span>Forecast Horizon</span>
+						</label>
+						<div className="range-wrap">
+							<input
+								id="horizon"
+								type="range"
+								min="1"
+								max="12"
+								value={horizon}
+								onChange={(e) => setHorizon(Number(e.target.value))}
+								className="input-range"
+								step="1"
+							/>
+							<div className="horizon-display">
+								<strong>{horizon}</strong>
+								<span>months</span>
+							</div>
+						</div>
+						<div className="horizon-labels small">
+							<span>1</span>
+							<span>6</span>
+							<span>12</span>
+						</div>
+					</div>
+
+					<button type="submit" className="page-button primary" disabled={loading}>
+						{loading ? (
+							<div className="btn-loader">
+								<LoaderCircle size={18} className="animate-spin" />
+								<span>Generating…</span>
+							</div>
+						) : (
+							<>
+								<TrendingUp size={18} />
+								<span>Generate Prediction</span>
+							</>
+						)}
+					</button>
+				</form>
+
+				{/* Quick stats card (skeleton if loading) */}
+				<div className="card-body stats-card">
+					{loading ? (
+						<div className="skeleton-block">
+							<div className="skeleton-title" />
+							<div className="skeleton-value" />
+						</div>
+					) : (
+						<>
+							<p className="card-text small muted">Projected total</p>
+							<h3 className="stats-value">{totalDisplay != null ? `₹${Number(totalDisplay).toFixed(0)}` : '—'}</h3>
+							<p className="card-text small muted">Next {horizon} {horizon === 1 ? 'month' : 'months'}</p>
+						</>
+					)}
+				</div>
+			</section>
+
+			{/* Error */}
 			{error && (
-				<div className="alert alert-error shadow-lg animate-slide-down">
-					<div>
-						<svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-						</svg>
-						<span>{error}</span>
+				<div className="page-card-container error-card">
+					<div className="card-body error-body">
+						<strong>Error</strong>
+						<p className="muted">{error}</p>
 					</div>
 				</div>
 			)}
 
 			{/* Results */}
-			{result && !loading && (
-				<div className="space-y-6 animate-fade-in">
-					{/* Summary Card */}
-					<div className="card bg-gradient-primary text-white shadow-xl card-hover">
-						<div className="card-body">
-							<div className="flex items-center justify-between">
-								<div className="flex-1">
-									<p className="text-sm opacity-90 font-medium flex items-center gap-2">
-										<DollarSign size={18} />
-										Total Predicted Expenses
+			{result && (
+				<section className="page-card-container predict-results-container">
+					<div className="grid-2 responsive-grid">
+						{/* Summary */}
+						<div className="card-body predict-summary-card">
+							<div className="predict-summary-content">
+								<div>
+									<p className="predict-summary-title">
+										<DollarSign size={16} /> Total Predicted
 									</p>
-									<h2 className="text-5xl font-bold mt-3 number-animate">
-										{totalDisplay != null ? `₹${totalDisplay.toFixed(2)}` : '—'}
-									</h2>
-									<p className="text-sm opacity-80 mt-2">
-										For the next {horizon} {horizon === 1 ? 'month' : 'months'}
-									</p>
+									<h2 className="predict-summary-value">₹{Number(totalDisplay || 0).toFixed(0)}</h2>
+									<p className="card-text small muted">For the next {horizon} {horizon === 1 ? 'month' : 'months'}</p>
 								</div>
-								<div className="bg-white/20 p-4 rounded-xl">
-									<TrendingUp size={48} />
+								<div className="predict-summary-icon">
+									<TrendingUp size={44} />
 								</div>
 							</div>
 						</div>
-					</div>
 
-					{/* Chart Visualization */}
-					{chartData.length > 0 && (
-						<div className="card bg-base-100 shadow-xl card-hover border border-base-300">
-							<div className="card-body">
-								<h3 className="card-title flex items-center gap-2 mb-4">
-									<BarChart3 className="text-primary" size={24} />
-									Prediction Trend
-								</h3>
-
-								<ResponsiveContainer width="100%" height={300}>
+						{/* Chart */}
+						<div className="card-body predict-chart-card">
+							<h3 className="predict-chart-title"><BarChart3 size={18} /> Prediction Trend</h3>
+							{chartData.length > 0 ? (
+								<ResponsiveContainer width="100%" height={260}>
 									<BarChart data={chartData}>
-										<CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-										<XAxis dataKey="name" stroke="#6b7280" fontSize={12} />
-										<YAxis stroke="#6b7280" fontSize={12} />
-										<Tooltip
-											contentStyle={{
-												backgroundColor: 'white',
-												border: '1px solid #e5e7eb',
-												borderRadius: '8px',
-												boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-											}}
-											formatter={(value) => [`₹${Number(value).toFixed(2)}`, 'Predicted Amount']}
-										/>
-										<Bar dataKey="value" fill="#6366f1" radius={[8, 8, 0, 0]} />
+										<CartesianGrid strokeDasharray="3 3" stroke="#eef2ff" />
+										<XAxis dataKey="name" />
+										<YAxis />
+										<Tooltip formatter={(value) => [`₹${Number(value).toFixed(2)}`, 'Predicted']} />
+										<Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={36} />
 									</BarChart>
 								</ResponsiveContainer>
-
-								<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-									{chartData.slice(0, 4).map((item, idx) => (
-										<div key={idx} className="stat bg-base-200 rounded-lg p-4">
-											<div className="stat-title text-xs">{item.name}</div>
-											<div className="stat-value text-primary text-lg">₹{Number(item.value).toFixed(0)}</div>
-										</div>
-									))}
-								</div>
-							</div>
-						</div>
-					)}
-
-					{/* Category Breakdown Toggle */}
-					<div className="card bg-base-100 shadow-xl card-hover border border-base-300">
-						<div className="card-body">
-							<div className="flex items-center justify-between">
-								<h3 className="card-title flex items-center gap-2">
-									<BarChart3 className="text-secondary" size={24} />
-									Category Breakdown
-								</h3>
-								<button
-									onClick={() => setShowBreakdown(s => !s)}
-									className="btn btn-outline btn-sm gap-2"
-								>
-									{showBreakdown ? <EyeOff size={16} /> : <Eye size={16} />}
-									{showBreakdown ? 'Hide' : 'Show'}
-								</button>
-							</div>
-
-							{showBreakdown && (
-								<div className="mt-6 animate-slide-down">
-									{Object.keys(byCategory).length === 0 ? (
-										<div className="text-center py-8 text-base-content/60">
-											<BarChart3 size={48} className="mx-auto mb-4 opacity-50" />
-											<p>No category predictions available</p>
-										</div>
-									) : (
-										<div className="overflow-x-auto">
-											<table className="table table-zebra w-full">
-												<thead className="bg-base-200">
-													<tr>
-														<th className="font-bold">Category</th>
-														{(chartData.length > 0 ? chartData : [{ name: `T+1` }]).map(c => (
-															<th key={c.name} className="font-bold text-center">{c.name}</th>
-														))}
-													</tr>
-												</thead>
-												<tbody>
-													{Object.entries(byCategory).map(([cat, arr]) => (
-														<tr key={cat} className="hover">
-															<td className="font-semibold">
-																<span className="badge badge-primary">{cat}</span>
-															</td>
-															{Array.isArray(arr) ? arr.map((v, i) => (
-																<td key={i} className="text-center font-bold text-primary">
-																	₹{Number(v).toFixed(2)}
-																</td>
-															)) : (
-																<td className="text-center">{String(arr)}</td>
-															)}
-														</tr>
-													))}
-												</tbody>
-											</table>
-										</div>
-									)}
-								</div>
+							) : (
+								<p className="muted">No time-series available for chart</p>
 							)}
+
 						</div>
 					</div>
 
-					{/* Tips Card */}
-					<div className="alert shadow-lg bg-info/10 border border-info/20">
-						<div>
-							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info shrink-0 w-6 h-6">
-								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-							</svg>
+					{/* Category Breakdown */}
+					<div className="card-body">
+						<div className="breakdown-header">
+							<h3 className="predict-chart-title"><BarChart3 size={16} /> Category Breakdown</h3>
+							<button className="btn small ghost" onClick={() => setShowBreakdown(s => !s)}>
+								{showBreakdown ? <><EyeOff size={14} /> Hide</> : <><Eye size={14} /> Show</>}
+							</button>
+						</div>
+						{showBreakdown && (
+							<div className="table-responsive">
+								{Object.keys(byCategory).length === 0 ? (
+									<div className="no-predictions">No category predictions available</div>
+								) : (
+									<table className="predict-category-table">
+										<thead>
+											<tr>
+												<th>Category</th>
+												{(labelDates && labelDates.length > 0 ? labelDates : [{ monthLabel: 'Month 1' }]).map(c => (
+													<th key={c.monthLabel}>{c.monthLabel}</th>
+												))}
+											</tr>
+										</thead>
+										<tbody>
+											{Object.entries(byCategory).map(([cat, arr]) => (
+												<tr key={cat}>
+													<td className="category-label">{cat}</td>
+													{Array.isArray(arr) ? arr.map((v, i) => (
+														<td key={i}>₹{Number(v).toFixed(0)}</td>
+													)) : (
+														<td>{String(arr)}</td>
+													)}
+												</tr>
+											))}
+										</tbody>
+									</table>
+								)}
+							</div>
+						)}
+					</div>
+
+					{/* Insights */}
+					<div className="card-body predict-tips-card">
+						<div className="tips-inner">
+							<div className="tips-icon-wrap">?	</div>
 							<div>
-								<h3 className="font-bold">Prediction Insights</h3>
-								<div className="text-sm">
-									These predictions are based on your historical spending patterns.
-									Actual expenses may vary based on seasonal changes and personal circumstances.
-								</div>
+								<h4 className="tips-title">Prediction Insights</h4>
+								<p className="tips-text muted">Predictions rely on historical patterns. Use them as a guide — review categories and adjust your budget if seasonal or one-off events occurred.</p>
 							</div>
 						</div>
+					</div>
+				</section>
+			)}
+
+			{/* Centered loader overlay (global) */}
+			{loading && (
+				<div className="loader-overlay" aria-hidden={!loading}>
+					<div className="loader-card card-surface">
+						<LoaderCircle size={42} className="animate-spin" />
+						<p className="muted">Generating prediction… this usually takes a few seconds</p>
 					</div>
 				</div>
 			)}
