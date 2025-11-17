@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-/* src/components/navBar.jsx */
+/* frontend/src/components/navBar.jsx */
 import React, { useState, useRef, useEffect } from "react";
 import { NavLink, Link, useLocation } from "react-router-dom";
 import {
@@ -9,11 +9,11 @@ import {
 	User,
 	LogOut,
 	Plus,
-	Menu,
-	SunMoon
+	Menu
 } from "lucide-react";
 
 import { useAuth } from "../contexts/authContext.jsx";
+import ThemeSwitcher from "./ThemeSwitcher";
 import "../styles/NavBar.css";
 
 export default function NavBar() {
@@ -22,10 +22,8 @@ export default function NavBar() {
 	const [isOpen, setIsOpen] = useState(false);
 	const dropdownRef = useRef(null);
 
-	// Close mobile menu on route change
 	useEffect(() => setIsOpen(false), [location.pathname]);
 
-	// Close on outside click / Esc
 	useEffect(() => {
 		function handleOutside(e) {
 			if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setIsOpen(false);
@@ -51,15 +49,18 @@ export default function NavBar() {
 					</Link>
 
 					{token && (
-						<button
-							className={`mobile-toggle${isOpen ? " open" : ""}`}
-							aria-label={isOpen ? "Close menu" : "Open menu"}
-							aria-expanded={isOpen}
-							onClick={() => setIsOpen(v => !v)}
-						>
-							<span className="sr-only">{isOpen ? "Close menu" : "Open menu"}</span>
-							<Menu size={18} />
-						</button>
+						<>
+							<ThemeSwitcher />
+							<button
+								className={`mobile-toggle${isOpen ? " open" : ""}`}
+								aria-label={isOpen ? "Close menu" : "Open menu"}
+								aria-expanded={isOpen}
+								onClick={() => setIsOpen(v => !v)}
+							>
+								<span className="sr-only">{isOpen ? "Close menu" : "Open menu"}</span>
+								<Menu size={18} />
+							</button>
+						</>
 					)}
 				</div>
 
@@ -103,19 +104,14 @@ export default function NavBar() {
 								</button>
 							</div>
 						</>
-					) : (
-						<>
-						</>
-					)}
+					) : null}
 				</nav>
 			</div>
 		</header>
 	);
 }
 
-/* NavItem helper component - keeps NavLink markup consistent */
 function NavItem({ to, exact, children, onClick }) {
-	// exact prop is optional
 	return (
 		<li className="nav-item" onClick={onClick}>
 			<NavLink

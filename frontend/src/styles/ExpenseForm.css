@@ -1,17 +1,17 @@
 /* ExpenseForm.css — modern, responsive, accessible */
 
-/* tokens */
+/* tokens (mapped to global design system) */
 :root{
-  --bg: #fafbff;
-  --panel: #ffffff;
-  --text: #0f172a;
-  --muted: #6b7280;
-  --accent: #6366f1;
-  --accent-2: #8b5cf6;
-  --success: #10b981;
-  --danger: #ef4444;
-  --border: rgba(15,23,42,0.06);
-  --shadow: 0 10px 30px rgba(15,23,42,0.06);
+  --bg: var(--bg-primary);
+  --panel: var(--card-bg);
+  --text: var(--text-primary);
+  --muted: var(--text-secondary);
+  --accent: var(--accent-primary);
+  --accent-2: var(--accent-secondary);
+  --success: var(--success);
+  --danger: var(--danger);
+  --border: var(--border-color);
+  --shadow: var(--shadow-md);
   --radius: 12px;
   --gap: 12px;
   --max-width: 520px;
@@ -24,7 +24,7 @@
   justify-content: center;
   padding: 20px;
   box-sizing: border-box;
-  background: linear-gradient(180deg, var(--bg), #0a07c300 60%);
+  background: linear-gradient(180deg, var(--bg), var(--bg-primary));
 }
 
 /* form */
@@ -56,14 +56,14 @@
   border: 1px solid var(--border);
   font-size: 15px;
   color: var(--text);
-  background: white;
+  background: var(--panel);
   outline: none;
   transition: border-color .14s ease, box-shadow .14s ease, transform .14s;
 }
-.ef-input::placeholder { color: #bfc7d9; }
+.ef-input::placeholder { color: var(--muted); }
 .ef-input:focus {
   border-color: var(--accent);
-  box-shadow: 0 8px 20px rgba(99,102,241,0.08);
+  box-shadow: var(--shadow-sm);
   transform: translateY(-1px);
 }
 

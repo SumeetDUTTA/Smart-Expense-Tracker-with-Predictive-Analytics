@@ -179,7 +179,7 @@ export default function Dashboard() {
 			<div className="loader-screen" role="status" aria-live="polite">
 				<div style={{ textAlign: 'center' }}>
 					<LoaderCircle size={48} className="animate-spin" />
-					<div style={{ marginTop: 8, color: 'var(--muted)' }}>Loading dashboard…</div>
+					<div style={{ marginTop: 8, color: 'var(--muted)' }}>Loading...</div>
 				</div>
 			</div>
 		);
@@ -248,14 +248,24 @@ export default function Dashboard() {
 						stats.last6Months && stats.last6Months.length > 0 ? (
 							<ResponsiveContainer width="100%" height={300}>
 								<LineChart data={stats.last6Months} margin={{ top: 8, right: 12, left: -8, bottom: 8 }}>
-									<CartesianGrid strokeDasharray="3 3" stroke="#e8eefc" />
-									<XAxis dataKey="month" stroke="#6b7280" fontSize={12} />
-									<YAxis stroke="#6b7280" fontSize={12} />
-									<Tooltip formatter={(value) => [`${fmt(value)}`, 'Amount']} />
+									<CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+									<XAxis
+										dataKey="month"
+										stroke="var(--text-secondary)"
+										tick={{ fill: "var(--text-secondary)", fontSize: 12 }} />
+									<YAxis
+										stroke="var(--text-secondary)"
+										tick={{ fill: "var(--text-secondary)", fontSize: 12 }}
+									/>
+									<Tooltip
+										formatter={(value) => [`${fmt(value)}`, "Amount"]}
+										contentStyle={{ background: "var(--card-bg)", borderColor: "var(--border-color)", color: "var(--text-primary)" }}
+										labelStyle={{ color: "var(--text-secondary)" }}
+									/>
 									<Line
 										type="monotone"
 										dataKey="amount"
-										stroke="#6366f1"
+										stroke="var(--accent-primary)"
 										strokeWidth={3}
 										dot={{ r: 4 }}
 										activeDot={{ r: 6 }}

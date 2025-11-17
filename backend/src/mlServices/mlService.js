@@ -55,7 +55,7 @@ export async function forecast(categories, h = 1, meta = {}) {
         }
 
         const { data: response } = await axios.post(url, payload, {
-            timeout: 10000,
+            timeout: 60000,
             headers: { 'Content-Type': 'application/json' }
         });
         

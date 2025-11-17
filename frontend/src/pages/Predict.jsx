@@ -47,6 +47,7 @@ export default function Predict() {
 			const res = await api.post('/predict', { horizonDates: Number(horizon) })
 			setResult(res.data)
 			setShowBreakdown(false)
+			console.log('Prediction result:', res.data)
 			toast.success('Prediction generated successfully!')
 		} catch (e) {
 			const errorMsg = e.response?.data?.message || e.message
@@ -62,6 +63,7 @@ export default function Predict() {
 	let totalPredArray = []
 	try {
 		totalPredArray = normalizeTotalPrediction(totalPredRaw) || []
+		console.log('Normalized total_prediction:', totalPredArray)
 	} catch (err) {
 		console.error('Error normalizing total_prediction:', err, totalPredRaw)
 		totalPredArray = []

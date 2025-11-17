@@ -56,7 +56,7 @@ export default function Login() {
 			<div className="loader-screen" role="status" aria-live="polite">
 				<div style={{ textAlign: 'center' }}>
 					<LoaderCircle size={48} className="animate-spin" />
-					<div style={{ marginTop: 8, color: 'var(--muted)' }}>Loading dashboard…</div>
+					<div style={{ marginTop: 8, color: 'var(--muted)' }}>Loading Dashboard...</div>
 				</div>
 			</div>
 		);

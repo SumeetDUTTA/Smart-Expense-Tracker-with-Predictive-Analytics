@@ -1,113 +1,190 @@
-# Project Title
+# ExpenseKeeper Frontend
 
-A brief one-sentence description of your frontend project.
+React-based web application for tracking expenses with real-time analytics and machine learning-powered predictions.
 
 ## 📝 Description
 
-Provide a detailed overview of the project. Explain its purpose, the problem it solves, and its target audience. Describe the main functionalities and what makes this project unique. For example, you can talk about the user journey, the core features you've implemented, and the overall architecture of the frontend application.
+The ExpenseKeeper frontend is a modern, responsive single-page application that provides users with an intuitive interface to manage their personal finances. Built with React and Vite, it features a comprehensive dashboard with interactive charts, expense management tools, and predictive analytics powered by a machine learning backend. The application uses a custom design system with light/dark theme support, ensuring a consistent and accessible user experience across all devices.
 
 ## ✨ Features
 
-Here's a list of the key features you have implemented in the frontend:
-
--   **User Authentication:** Secure login, registration, and session management using [e.g., JWT, OAuth].
--   **Responsive Design:** The application is fully responsive and provides a seamless experience on desktops, tablets, and mobile devices using [e.g., CSS Media Queries, Flexbox, Grid].
--   **Component-Based Architecture:** Built using a modular structure with reusable components for easier maintenance and scalability.
--   **State Management:** Centralized state management using [e.g., Redux Toolkit, React Context, Zustand] to handle application-wide data, such as user info and theme settings.
--   **Client-Side Routing:** Implemented dynamic routing with [e.g., React Router] to navigate between different pages without a full page reload.
--   **CRUD Operations:** Users can Create, Read, Update, and Delete [e.g., posts, products, tasks] through an intuitive user interface.
--   **API Integration:** Asynchronous communication with the backend API using [e.g., Axios, Fetch API] to retrieve and send data.
--   **Form Handling & Validation:** User-friendly forms with real-time, client-side validation using [e.g., Formik, React Hook Form].
+-   **User Authentication:** JWT-based secure login and registration with persistent session management via Context API and localStorage
+-   **Responsive Design:** Mobile-first design using TailwindCSS and DaisyUI, fully responsive across desktop (1920px+), tablet (768px-1024px), and mobile (320px-768px) viewports
+-   **Component-Based Architecture:** Modular React components with clear separation of concerns (pages, components, contexts, utilities)
+-   **State Management:** React Context API for global auth state; local state management with hooks for component-specific data
+-   **Client-Side Routing:** React Router v6 with protected routes, dynamic navigation, and programmatic redirects
+-   **CRUD Operations:** Full expense lifecycle management—create, read, update, delete with instant UI feedback
+-   **API Integration:** Axios-based HTTP client with request/response interceptors for auth tokens and error handling
+-   **Form Handling & Validation:** Custom controlled forms with real-time validation, character limits, and user-friendly error messages
+-   **Data Visualization:** Interactive charts using Recharts (line charts, pie charts, bar charts) with responsive containers and tooltips
+-   **Predictive Analytics UI:** Multi-month expense forecasting with category breakdowns, confidence indicators, and budget comparison
+-   **Theme System:** Light/dark mode toggle with CSS custom properties (design tokens) for consistent theming across all components
+-   **Accessibility:** ARIA labels, keyboard navigation, screen reader support, and semantic HTML throughout
+-   **Toast Notifications:** React Hot Toast for success/error feedback with custom styling
+-   **Lazy Loading:** Intersection Observer for on-demand chart rendering on mobile devices to optimize performance
 
 ## 🛠️ Technologies Used
 
--   **Framework:** [e.g., React.js, Vue.js, Angular]
--   **State Management:** [e.g., Redux, Context API, Pinia]
--   **Routing:** [e.g., React Router, Vue Router]
--   **Styling:** [e.g., Tailwind CSS, Material-UI, Styled Components, SCSS]
--   **API Client:** [e.g., Axios, Fetch API]
--   **Build Tool:** [e.g., Vite, Create React App (Webpack)]
--   **Package Manager:** [e.g., npm, yarn]
+-   **Framework:** React 18.x with hooks (useState, useEffect, useMemo, useRef, useContext)
+-   **Build Tool:** Vite 5.x for fast dev server and optimized production builds
+-   **State Management:** React Context API for authentication, local state for UI
+-   **Routing:** React Router v6 with NavLink, useNavigate, useLocation
+-   **Styling:** TailwindCSS 3.x + DaisyUI for utility-first styling and component themes
+-   **Charts:** Recharts for responsive, declarative data visualization
+-   **Icons:** Lucide React for consistent, customizable SVG icons
+-   **API Client:** Axios with interceptors for centralized request/response handling
+-   **Notifications:** React Hot Toast for user feedback
+-   **Package Manager:** npm
 
 ## 📂 Project Structure
 
-A high-level overview of the project's directory structure.
-
 ```
-/
-├── public/              # Static assets
+frontend/
+├── public/                  # Static assets served at root
 ├── src/
-│   ├── assets/          # Images, fonts, etc.
-│   ├── components/      # Reusable UI components
-│   ├── hooks/           # Custom React hooks
-│   ├── pages/           # Page components corresponding to routes
-│   ├── services/        # API calls and other business logic
-│   ├── store/           # State management logic (e.g., Redux slices)
-│   ├── styles/          # Global styles, variables
-│   ├── utils/           # Utility functions
-│   ├── App.js           # Main application component
-│   └── index.js         # Entry point of the application
+│   ├── assets/              # Images, icons, and media files
+│   ├── components/          # Reusable UI components
+│   │   ├── ErrorBoundary.jsx       # Error boundary for graceful failure handling
+│   │   ├── expenseForm.jsx         # Form component for adding/editing expenses
+│   │   ├── ExpenseNotFound.jsx     # 404 component for missing expenses
+│   │   ├── navBar.jsx              # Navigation bar with theme toggle
+│   │   ├── rateLimitedUI.jsx       # Rate limit feedback component
+│   │   └── ThemeSwitcher.jsx       # Theme toggle switch component
+│   ├── contexts/            # React Context providers
+│   │   └── authContext.jsx         # Authentication state management
+│   ├── lib/                 # Shared utilities and configurations
+│   │   └── api.js                  # Axios instance with interceptors
+│   ├── pages/               # Page-level components
+│   │   ├── addExpenses.jsx         # Add new expense page
+│   │   ├── dashboard.jsx           # Main analytics dashboard
+│   │   ├── Login.jsx               # Login page
+│   │   ├── Predict.jsx             # ML prediction interface
+│   │   ├── Profile.jsx             # User profile and settings
+│   │   └── showExpenses.jsx        # Expense list and analytics
+│   ├── App.jsx              # Main app component with routes
+│   ├── App.css              # Global application styles
+│   ├── index.css            # CSS reset, design tokens, base styles
+│   └── main.jsx             # Application entry point
 ├── .gitignore
-├── package.json
+├── eslint.config.js         # ESLint configuration
+├── index.html               # HTML template
+├── package.json             # Dependencies and scripts
+├── postcss.config.js        # PostCSS configuration
+├── tailwind.config.js       # TailwindCSS configuration
+├── vite.config.js           # Vite build configuration
 └── README.md
+
+
 ```
 
 ## 🚀 Getting Started
 
-Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+Follow these instructions to get the frontend running locally.
 
 ### Prerequisites
 
-Make sure you have the following installed on your machine:
 -   Node.js (v16 or later)
 -   npm or yarn
+-   Backend API running on `http://localhost:5000` (see backend README)
+-   ML API running on `http://localhost:8000` (see mlModel README)
 
 ### Installation
 
 1.  Clone the repository:
     ```sh
-    git clone https://github.com/your-username/your-repo-name.git
+    git clone https://github.com/SumeetDUTTA/Smart-Expense-Tracker-with-Predictive-Analytics.git
     ```
-2.  Navigate to the project directory:
+2.  Navigate to the frontend directory:
     ```sh
     cd frontend
     ```
-3.  Install the dependencies:
+3.  Install dependencies:
     ```sh
     npm install
-    # or
-    yarn install
     ```
+
+### Configuration
+
+No `.env` file needed for frontend by default. API URLs are configured in `src/lib/api.js`:
+-   Backend API: `http://localhost:5000/api`
+-   ML API: `http://localhost:8000`
+
+To change API endpoints, edit `src/lib/api.js`.
 
 ### Running the Application
 
-To start the development server, run:
+Start the Vite development server:
 ```sh
-npm start
-# or
-yarn start
+npm run dev
 ```
-The application will be available at `http://localhost:3000`.
+The application will be available at `http://localhost:5173`.
 
 ## 📜 Available Scripts
 
-In the project directory, you can run:
+-   `npm run dev`: Starts Vite dev server with hot module replacement on port 5173
+-   `npm run build`: Builds production-optimized bundle to `dist/` folder
+-   `npm run preview`: Previews production build locally
+-   `npm run lint`: Runs ESLint to check code quality
 
--   `npm start`: Runs the app in development mode.
--   `npm run build`: Builds the app for production to the `build` folder.
--   `npm test`: Launches the test runner in interactive watch mode.
--   `npm run eject`: (If using Create React App) Ejects the app from the CRA configuration.
+## 🎨 Theme System
 
-## 🖼️ Screenshots
+The application uses CSS custom properties (design tokens) for theming. All colors, shadows, and spacing are defined in `src/index.css`:
 
-*(Optional: Add screenshots of your application to give a visual overview.)*
+**Design Tokens:**
+-   `--bg-primary`, `--bg-secondary`: Background colors
+-   `--text-primary`, `--text-secondary`, `--text-muted`: Text colors
+-   `--accent-primary`, `--accent-secondary`: Accent colors
+-   `--card-bg`, `--panel`, `--glass`: Surface colors
+-   `--border-color`: Border and divider colors
+-   `--shadow-sm`, `--shadow-md`, `--shadow-lg`: Shadow levels
 
-| Login Page                               | Dashboard                                |
-| ---------------------------------------- | ---------------------------------------- |
-| ![Login Page](path/to/login-screenshot.png) | ![Dashboard](path/to/dashboard-screenshot.png) |
+**Theme Toggle:**
+Users can switch between light and dark themes using the sun/moon icon in the navbar. Theme preference is persisted to localStorage.
+
+## 🔒 Authentication Flow
+
+1.  User registers via `/register` → Backend creates account → Auto-redirect to login
+2.  User logs in via `/login` → Backend validates → Returns JWT token
+3.  Token stored in localStorage and AuthContext
+4.  Protected routes check auth status → Redirect to login if unauthenticated
+5.  All API requests include `Authorization: Bearer <token>` header
+6.  Token refresh handled by backend (7-day expiry)
+7.  Logout clears localStorage and redirects to login
+
+## 📊 Key Pages
+
+### Dashboard (`/dashboard`)
+-   Overview cards: Total Expenses, Budget Status, Expense Distribution
+-   Monthly trend line chart with category breakdown
+-   Category-wise expense pie chart
+-   Top 5 recent expenses table
+
+### Add Expense (`/add-expense`)
+-   Expense form with amount, category, description, date
+-   Client-side validation with character limits
+-   Budget warning if exceeding monthly limit
+-   Success toast with redirect to expenses list
+
+### Show Expenses (`/expenses`)
+-   Searchable, filterable expense table with pagination
+-   Monthly expense line chart with interactive brush
+-   Category pie chart with hover tooltips
+-   Edit/delete actions with confirmation dialogs
+
+### Predict (`/predict`)
+-   ML-powered expense forecasting for 1-6 months
+-   Interactive sliders for monthly budget, spending behavior, category distribution
+-   Category-wise prediction breakdown with percentages
+-   Confidence indicator based on historical data
+
+### Profile (`/profile`)
+-   User info display (name, email, account creation date)
+-   Monthly budget configuration
+-   Theme toggle and preferences
+-   Expense statistics (total count, average, highest/lowest)
 
 ## 🧑‍💻 Author
 
--   **[Your Name]** - [Your Role]
--   GitHub: [@your-github-username](https://github.com/your-github-username)
--   LinkedIn: [Your LinkedIn Profile URL](https://linkedin.com/in/your-profile)
+-   **Sumeet Dutta** - Full-Stack Developer
+-   GitHub: [@SumeetDUTTA](https://github.com/SumeetDUTTA)
+-   Project: [Smart-Expense-Tracker-with-Predictive-Analytics](https://github.com/SumeetDUTTA/Smart-Expense-Tracker-with-Predictive-Analytics)

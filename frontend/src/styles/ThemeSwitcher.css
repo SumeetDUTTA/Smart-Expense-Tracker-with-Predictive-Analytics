@@ -1,0 +1,34 @@
+/* frontend/src/styles/ThemeSwitcher.css */
+.theme-switcher {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-switcher:hover {
+  background: var(--card-hover-bg);
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.theme-switcher:active {
+  transform: translateY(0);
+}
+
+.theme-switcher svg {
+  transition: transform 0.3s ease;
+}
+
+.theme-switcher:hover svg {
+  transform: rotate(15deg);
+}

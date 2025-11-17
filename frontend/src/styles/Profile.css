@@ -2,17 +2,17 @@
 /* Modern, responsive profile page styles */
 
 :root {
-	--bg: #f7f9fc;
-	--panel: #ffffff;
-	--muted: #6b7280;
-	--text: #0f172a;
-	--accent: #4a90e2;
-	--accent-2: #6366f1;
-	--success: #10b981;
-	--danger: #ef4444;
+	--bg: var(--bg-primary);
+	--panel: var(--card-bg);
+	--muted: var(--text-secondary);
+	--text: var(--text-primary);
+	--accent: var(--accent-primary);
+	--accent-2: var(--accent-secondary);
+	--success: var(--success);
+	--danger: var(--danger);
 	--card-radius: 12px;
-	--shadow-sm: 0 6px 18px rgba(15, 23, 42, 0.06);
-	--shadow-xs: 0 2px 6px rgba(15, 23, 42, 0.04);
+	--shadow-sm: var(--shadow-md);
+	--shadow-xs: var(--shadow-sm);
 	--max-width: 1100px;
 	--container-padding: 20px;
 }
@@ -22,7 +22,7 @@
 	padding: 28px var(--container-padding);
 	max-width: var(--max-width);
 	margin: 0 auto;
-	background: linear-gradient(180deg, #fbfdff 0%, var(--bg) 100%);
+	background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg) 100%);
 	box-sizing: border-box;
 	min-height: 100vh;
 	font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
@@ -86,7 +86,7 @@
 	background: var(--panel);
 	border-radius: var(--card-radius);
 	box-shadow: var(--shadow-sm);
-	border: 1px solid rgba(15, 23, 42, 0.03);
+	border: 1px solid var(--border-color);
 	overflow: hidden;
 }
 
@@ -112,12 +112,12 @@
 	width: 100%;
 	height: 100%;
 	border-radius: 18px;
-	background: linear-gradient(180deg, #eef2ff, #f7f7ff);
+	background: linear-gradient(180deg, var(--panel), var(--bg-secondary));
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	box-shadow: var(--shadow-xs);
-	border: 1px solid rgba(15, 23, 42, 0.04);
+	border: 1px solid var(--border-color);
 }
 
 .profile-avatar-initial {
@@ -156,7 +156,7 @@
 /* Divider */
 .profile-divider {
 	height: 1px;
-	background: linear-gradient(90deg, rgba(15, 23, 42, 0.02), rgba(15, 23, 42, 0.03));
+	background: linear-gradient(90deg, rgba(15,23,42,0.12), rgba(15,23,42,0.18));
 	margin: 16px 0;
 }
 
@@ -171,10 +171,10 @@
 	display: flex;
 	gap: 12px;
 	align-items: center;
-	background: linear-gradient(180deg, #ffffff, #fbfdff);
+	background: linear-gradient(180deg, var(--panel), var(--bg-secondary));
 	padding: 12px;
 	border-radius: 10px;
-	border: 1px solid rgba(15, 23, 42, 0.03);
+	border: 1px solid var(--border-color);
 }
 
 .profile-detail-icon .user-icon {
@@ -199,7 +199,7 @@
 	background: var(--panel);
 	border-radius: var(--card-radius);
 	box-shadow: var(--shadow-sm);
-	border: 1px solid rgba(15, 23, 42, 0.03);
+	border: 1px solid var(--border-color);
 }
 
 .budget-settings-title {
@@ -237,7 +237,7 @@
 }
 
 .monthly-budget-currency {
-	background: #f2f5ff;
+	background: var(--bg-secondary);
 	padding: 8px 10px;
 	border-radius: 8px;
 	color: var(--accent-2);
@@ -248,9 +248,11 @@
 	flex: 1;
 	padding: 10px 12px;
 	border-radius: 10px;
-	border: 1px solid rgba(15, 23, 42, 0.06);
+	background: var(--panel);
+	border: 1px solid var(--border-color);
 	outline: none;
 	font-size: 14px;
+	color: var(--text);
 }
 
 .monthly-budget-input:focus {
@@ -261,8 +263,9 @@
 .user-type-select {
 	padding: 10px 12px;
 	border-radius: 10px;
-	border: 1px solid rgba(15, 23, 42, 0.06);
-	background: white;
+	background: var(--panel);
+  border: 1px solid var(--border-color);
+  color: var(--text);
 }
 
 .monthly-budget-helptext,
@@ -309,10 +312,10 @@
 }
 
 .budget-display-card {
-	background: linear-gradient(180deg, #fff, #fbfdff);
+	background: linear-gradient(180deg, var(--panel), var(--bg-secondary));
 	padding: 12px;
 	border-radius: 10px;
-	border: 1px solid rgba(15, 23, 42, 0.03);
+	border: 1px solid var(--border-color);
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -343,7 +346,7 @@
 	background: var(--panel);
 	border-radius: var(--card-radius);
 	box-shadow: var(--shadow-sm);
-	border: 1px solid rgba(15, 23, 42, 0.03);
+	border: 1px solid var(--border-color);
 }
 
 .account-stats-grid {
@@ -353,10 +356,10 @@
 }
 
 .account-stats-item {
-	background: linear-gradient(180deg, #fff, #fbfdff);
+	background: linear-gradient(180deg, var(--panel), var(--bg-secondary));
 	padding: 12px;
 	border-radius: 10px;
-	border: 1px solid rgba(15, 23, 42, 0.03);
+	border: 1px solid var(--border-color);
 }
 
 .account-stats-label {
@@ -429,6 +432,7 @@
 		flex-direction: column;
 		align-items: flex-start;
 		gap: 10px;
+		border: 1px solid var(--border-color);
 	}
 
 	.profile-header-card .btn {

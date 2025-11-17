@@ -84,7 +84,7 @@ export default function Profile() {
 			<div className="loader-screen" role="status" aria-live="polite">
 				<div style={{ textAlign: 'center' }}>
 					<LoaderCircle size={48} className="animate-spin" />
-					<div style={{ marginTop: 8, color: 'var(--muted)' }}>Loading Profile…</div>
+					<div style={{ marginTop: 8, color: 'var(--muted)' }}>Loading...</div>
 				</div>
 			</div>
 		);
