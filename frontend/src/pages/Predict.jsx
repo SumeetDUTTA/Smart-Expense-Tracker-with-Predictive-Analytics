@@ -46,9 +46,6 @@ export default function Predict() {
 		try {
 			const res = await api.post('/predict', { horizonDates: Number(horizon) })
 			setResult(res.data)
-			console.log('API result:', res.data);
-			console.log('total_prediction (raw):', res.data?.total_prediction);
-			console.log('prediction_by_category (raw):', res.data?.prediction_by_category);
 			setShowBreakdown(false)
 			toast.success('Prediction generated successfully!')
 		} catch (e) {

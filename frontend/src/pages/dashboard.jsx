@@ -125,9 +125,6 @@ export default function Dashboard() {
 
 		const obs = new IntersectionObserver((entries) => {
 			entries.forEach(entry => {
-				// debug logs help root-cause why nothing builds
-				console.log("[IO] entry:", entry.target && entry.target.dataset && entry.target.dataset.key, entry.isIntersecting, entry.intersectionRatio);
-
 				if (entry.isIntersecting && entry.intersectionRatio > 0) {
 					const el = entry.target;
 					if (el === trendRef.current && !buildTrend) {
