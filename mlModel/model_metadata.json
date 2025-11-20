@@ -1,0 +1,61 @@
+{
+  "features": [
+    "lag_1",
+    "lag_2",
+    "lag_3",
+    "lag_12",
+    "Rolling3",
+    "Rolling6",
+    "Rolling12",
+    "trend_3",
+    "pct_change",
+    "month_num",
+    "month_sin",
+    "month_cos",
+    "log_total_budget",
+    "spend_ratio",
+    "category_ratio",
+    "Category_Entertainment",
+    "Category_Food & Drink",
+    "Category_Health & Fitness",
+    "Category_Personal Care",
+    "Category_Rent",
+    "Category_Travel",
+    "Category_Utilities",
+    "UserType_college_student",
+    "UserType_family_high",
+    "UserType_family_moderate",
+    "UserType_luxury_lifestyle",
+    "UserType_senior_retired",
+    "UserType_young_professional",
+    "budget_category_low",
+    "budget_category_moderate",
+    "budget_category_high",
+    "budget_category_very_high",
+    "budget_category_luxury"
+  ],
+  "best_params": {
+    "n_estimators": 690,
+    "max_depth": 6,
+    "learning_rate": 0.030778892880415888,
+    "reg_lambda": 1.9810255906073189,
+    "reg_alpha": 0.4848490132195659
+  },
+  "mae_log": 0.6065687180390389,
+  "rmse_log": 0.7207935790498545,
+  "mae_rupees": 1145.0773913472497,
+  "rmse_rupees": 2145.4690593505693,
+  "training_info": "Universal model trained on all user types and spending ranges",
+  "user_types": [
+    "college_student",
+    "young_professional",
+    "family_moderate",
+    "family_high",
+    "luxury_lifestyle",
+    "senior_retired"
+  ],
+  "budget_range": [
+    3000,
+    60000
+  ]
+}

@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
 import joblib
+import json
+import os
+from xgboost import XGBRegressor
 from fastapi import FastAPI
 from pydantic import BaseModel
 from datetime import datetime
@@ -13,19 +16,33 @@ logger = logging.getLogger(__name__)
 logger.info("Starting ML API...")
 logger.info("numpy version: %s", np.__version__)
 
-MODEL_PATH = "expense_forecast_universal.pkl"  # Use the new universal model
-logger.info("Loading model from: %s", MODEL_PATH)
-model_package = joblib.load(MODEL_PATH)
-logger.info("Loaded object type: %s", type(model_package))
+# Load model - try JSON first, fallback to pickle
+MODEL_JSON_PATH = "expense_forecast_model.json"
+METADATA_PATH = "model_metadata.json"
+MODEL_PKL_PATH = "expense_forecast_universal.pkl"
 
-if isinstance(model_package, dict):
-    model = model_package['model']
-    FEATURES = model_package['features']
-    logger.info("Loaded package dict. Features found: %s", bool(FEATURES))
+if os.path.exists(MODEL_JSON_PATH) and os.path.exists(METADATA_PATH):
+    logger.info("Loading model from JSON format...")
+    model = XGBRegressor()
+    model.load_model(MODEL_JSON_PATH)
+    
+    with open(METADATA_PATH, 'r') as f:
+        metadata = json.load(f)
+    FEATURES = metadata['features']
+    logger.info("✅ Model loaded from JSON successfully! Features: %d", len(FEATURES))
 else:
-    model = model_package
-    FEATURES = None
-    logger.warning("Model package is not a dict. FEATURES set to None.")
+    logger.info("JSON files not found, loading from pickle: %s", MODEL_PKL_PATH)
+    model_package = joblib.load(MODEL_PKL_PATH)
+    logger.info("Loaded object type: %s", type(model_package))
+    
+    if isinstance(model_package, dict):
+        model = model_package['model']
+        FEATURES = model_package['features']
+        logger.info("Loaded package dict. Features found: %s", bool(FEATURES))
+    else:
+        model = model_package
+        FEATURES = None
+        logger.warning("Model package is not a dict. FEATURES set to None.")
 
 app = FastAPI(title='Expense Forecast API', version='2.0')
 
