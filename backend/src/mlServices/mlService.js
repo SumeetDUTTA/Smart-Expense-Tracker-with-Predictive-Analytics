@@ -1,6 +1,9 @@
 import axios from 'axios';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const base = process.env.ML_API_URL || 'http://localhost:8000';
+console.log(`ML Service using API URL: ${base}`);
 
 // Simple helper function
 function clamp(value, min, max) {
