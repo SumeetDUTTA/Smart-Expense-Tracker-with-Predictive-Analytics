@@ -10,5 +10,15 @@
       ]
     }
   ],
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://expense-keeper-backend.onrender.com/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -16,6 +17,8 @@ import api from "../lib/api";
 import "../styles/Dashboard.css";
 
 export default function Dashboard() {
+
+
 	const nav = useNavigate();
 
 	// Dashboard stats (unchanged)
