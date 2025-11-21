@@ -44,7 +44,7 @@ export default function Predict() {
 		setLoading(true)
 		setError(null)
 		try {
-			const res = await api.post('/predict', { horizonDates: Number(horizon) })
+			const res = await api.post('/api/predict', { horizonDates: Number(horizon) })
 			setResult(res.data)
 			setShowBreakdown(false)
 			console.log('Prediction result:', res.data)

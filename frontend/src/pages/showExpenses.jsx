@@ -75,7 +75,7 @@ export default function ShowExpenses() {
 	async function fetchExpenses() {
 		setLoading(true)
 		try {
-			const res = await api.get('/expenses')
+			const res = await api.get('/api/expenses')
 			// handle different backend shapes
 			const data = Array.isArray(res.data) ? res.data : (res.data?.expenses && Array.isArray(res.data.expenses) ? res.data.expenses : [])
 			setList(data)
@@ -94,7 +94,7 @@ export default function ShowExpenses() {
 
 	async function update(id, payload) {
 		try {
-			await api.patch(`/expenses/${id}`, payload)
+			await api.patch(`/api/expenses/${id}`, payload)
 			toast.success?.('Expense updated')
 			setEditing(null)
 			fetchExpenses()
@@ -107,7 +107,7 @@ export default function ShowExpenses() {
 	async function remove(id) {
 		if (!confirm('Delete this expense?')) return
 		try {
-			await api.delete(`/expenses/${id}`)
+			await api.delete(`/api/expenses/${id}`)
 			toast.success?.('Expense deleted')
 			fetchExpenses()
 		} catch (err) {

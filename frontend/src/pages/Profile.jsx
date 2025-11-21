@@ -26,7 +26,7 @@ export default function Profile() {
 	async function fetchProfile() {
 		setLoading(true);
 		try {
-			const res = await api.get("/user/profile");
+			const res = await api.get("/api/user/profile");
 			const userData = res.data.user || res.data;
 			setProfile(userData);
 			setMonthlyBudget(userData.monthlyBudget || "");
@@ -63,7 +63,7 @@ export default function Profile() {
 				return;
 			}
 
-			const res = await api.patch("/user/meta", payload);
+			const res = await api.patch("/api/user/meta", payload);
 
 			if (res.data.success && res.data.user) {
 				toast.success("Profile updated successfully!");

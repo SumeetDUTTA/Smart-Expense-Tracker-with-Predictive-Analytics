@@ -54,7 +54,7 @@ export default function Dashboard() {
 	async function fetchDashboardData() {
 		setLoading(true);
 		try {
-			const res = await api.get("/expenses");
+			const res = await api.get("/api/expenses");
 			const expenses = res.data || [];
 
 			const now = new Date();

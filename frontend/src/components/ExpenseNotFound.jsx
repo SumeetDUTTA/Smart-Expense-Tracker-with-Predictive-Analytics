@@ -7,12 +7,12 @@ const ExpenseNotFound = () => {
       <div className="bg-primary/10 rounded-full p-8">
         <NotebookIcon className="size-10 text-primary" />
       </div>
-      <h3 className="text-2xl font-bold">No notes yet</h3>
+      <h3 className="text-2xl font-bold">No expenses yet</h3>
       <p className="text-base-content/70">
-        Ready to organize your thoughts? Create your first note to get started on your journey.
+        Ready to organize your expenses? Add your first expense to get started on your journey.
       </p>
-      <Link to="/expenses" className="btn btn-primary">
-        Create Your First Note
+      <Link to="/add-expenses" className="btn btn-primary">
+        Add Your First Expense
       </Link>
     </div>
   );

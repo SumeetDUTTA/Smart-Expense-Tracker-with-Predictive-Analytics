@@ -17,7 +17,7 @@ export default function AddExpense() {
     setSubmitting(true);
     setLoading(true);
     try {
-      await api.post("/expenses", payload);
+      await api.post("/api/expenses", payload);
       toast.success?.("Expense added");
       navigate("/expenses");
     } catch (err) {
