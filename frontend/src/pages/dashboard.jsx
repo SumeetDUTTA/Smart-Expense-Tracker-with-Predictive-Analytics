@@ -1,5 +1,3 @@
-// frontend/src/pages/Dashboard.jsx
-// Replaces your existing Dashboard.jsx, kept original logic and added profile + welcome modal
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -164,7 +162,15 @@ export default function Dashboard() {
 
 			// Only show popup if user lacks any of these and hasn't snoozed it
 			const snoozeKey = "seenBudgetPopup";
-			const snoozed = localStorage.getItem(snoozeKey);
+			const snoozed = (() => {
+				const v = localStorage.getItem(snoozeKey);
+				if (!v) return false;
+				const ts = Number(v);
+				if (!Number.isNaN(ts)) {
+					return Date.now() < ts; // snoozed if timestamp is in future
+				}
+				return v === "1"; // legacy or permanent seen
+			})();
 			// optional heuristic: only show for "new" accounts (created in last 14 days) OR always if missing
 			let isNew = false;
 			if (userData?.createdAt) {
@@ -179,9 +185,9 @@ export default function Dashboard() {
 			if ((!hasBudget || !hasUserType) && !snoozed) {
 				// If you prefer only for new accounts, uncomment next line
 				// if (isNew) {
-					setModalBudget(userData?.monthlyBudget || "");
-					setModalUserType(userData?.userType || "");
-					setTimeout(() => setShowWelcomeModal(true), 300); // small delay so page paints first
+				setModalBudget(userData?.monthlyBudget || "");
+				setModalUserType(userData?.userType || "");
+				setTimeout(() => setShowWelcomeModal(true), 300); // small delay so page paints first
 				// }
 			}
 		} catch (error) {
@@ -371,7 +377,7 @@ export default function Dashboard() {
 							<ResponsiveContainer width="100%" height={300}>
 								<LineChart data={stats.last6Months} margin={{ top: 8, right: 12, left: -8, bottom: 8 }}>
 									<CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-									<XAxis dataKey="month" stroke="var(--text-secondary)" tick={{ fill: "var(--text-secondary)", fontSize: 12 }}/>
+									<XAxis dataKey="month" stroke="var(--text-secondary)" tick={{ fill: "var(--text-secondary)", fontSize: 12 }} />
 									<YAxis stroke="var(--text-secondary)" tick={{ fill: "var(--text-secondary)", fontSize: 12 }} />
 									<Tooltip formatter={(value) => [`${fmt(value)}`, "Amount"]} contentStyle={{ background: "var(--card-bg)", borderColor: "var(--border-color)", color: "var(--text-primary)" }} labelStyle={{ color: "var(--text-secondary)" }} />
 									<Line type="monotone" dataKey="amount" stroke="var(--accent-primary)" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
