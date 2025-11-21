@@ -11,13 +11,15 @@ function signToken(userID) {
 }
 
 async function register(req, res, next) {
+    console.log('REGISTER attempt at', new Date().toISOString());
+    console.log('Request body:', JSON.stringify(req.body));
     try {
         const { name, email, password } = req.body;
         const exists = await User.findOne({ email });
         if (exists) throw new ApiError(400, 'Email already registered');
         const user = await User.create({ name, email, password });
         const token = signToken(user._id);
-        res.status(201).json({ 
+        res.status(201).json({
             success: true,
             user: { id: user._id, name: user.name, email: user.email },
             token,
@@ -28,8 +30,10 @@ async function register(req, res, next) {
 }
 
 async function login(req, res, next) {
+    console.log('LOGIN attempt at', new Date().toISOString());
+    console.log('Request body:', JSON.stringify(req.body));
     try {
-        const {email, password} = req.body;
+        const { email, password } = req.body;
         const user = await User.findOne({ email }).select('+password');
         if (!user) throw new ApiError(401, 'Invalid email or password');
         const isMatch = await bcrypt.compare(password, user.password);

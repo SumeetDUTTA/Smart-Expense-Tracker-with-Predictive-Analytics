@@ -34,7 +34,19 @@ function AuthProvider({ children }) {
 
     async function login(credentials) {
         try {
-            const res = await api.post("/api/auth/login", credentials)
+            const res = await api.post("/api/auth/login", credentials).
+                then(r => console.log('Login response:', r) || r).
+                catch(err => {
+                    console.error('Login error full:', err);
+                    if (err.response) {
+                        console.error('status', err.response.status);
+                        console.error('response.data', err.response.data);
+                        console.error('response.headers', err.response.headers);
+                    } else {
+                        console.error('no response, network error or CORS', err.message);
+                    }
+                });
+
             if (res.data && res.data.token) {
                 setToken(res.data.token);
                 setUser(res.data.user);
