@@ -34,9 +34,7 @@ function AuthProvider({ children }) {
 
     async function login(credentials) {
         try {
-            console.log('🔥 Attempting login with credentials:', credentials);
             const res = await api.post("/api/auth/login", credentials)
-            console.log('🔥 Login response:', res);
             if (res.data && res.data.token) {
                 setToken(res.data.token);
                 setUser(res.data.user);
@@ -77,7 +75,7 @@ function AuthProvider({ children }) {
         }
 
     }
-    
+
     function logout() {
         setToken(null);
         setUser(null);
