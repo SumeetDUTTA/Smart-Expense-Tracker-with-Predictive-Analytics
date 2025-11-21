@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE = import.meta.evn.VITE_API_TARGET || "http://localhost:5000"
+const BASE = import.meta.env.VITE_API_TARGET || "http://localhost:5000"
 
 const api = axios.create({
     baseURL: BASE,
