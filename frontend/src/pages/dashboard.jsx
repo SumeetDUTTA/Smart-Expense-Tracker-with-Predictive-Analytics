@@ -1,6 +1,7 @@
-/* dashboard.jsx — lazy-build charts on scroll (mobile only) */
+// frontend/src/pages/Dashboard.jsx
+// Replaces your existing Dashboard.jsx, kept original logic and added profile + welcome modal
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
 	TrendingUp, TrendingDown, Wallet, Calendar, ArrowRight,
 	PieChart as PieIcon, DollarSign, Target, Plus,
@@ -17,13 +18,16 @@ import api from "../lib/api";
 import "../styles/Dashboard.css";
 
 export default function Dashboard() {
+	const nav = useNavigate();
+
+	// Dashboard stats (unchanged)
 	const [stats, setStats] = useState({
 		thisMonth: 0, lastMonth: 0, total: 0, recentExpenses: [],
 		categoryBreakdown: {}, last6Months: [], dailyAverage: 0, transactionCount: 0
 	});
 	const [loading, setLoading] = useState(true);
 
-	// --- Lazy build flags & refs
+	// --- Lazy build flags & refs (original)
 	const trendRef = useRef(null);
 	const pieRef = useRef(null);
 	const topCategoriesRef = useRef(null);
@@ -49,10 +53,43 @@ export default function Dashboard() {
 		}
 	}, [isMobile]);
 
-	useEffect(() => { fetchDashboardData(); }, []);
+	// Profile state and modal controls (NEW)
+	const [profile, setProfile] = useState(null);
+	const [profileLoading, setProfileLoading] = useState(false);
 
-	async function fetchDashboardData() {
+	const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+	const [modalBudget, setModalBudget] = useState("");
+	const [modalUserType, setModalUserType] = useState("");
+	const [modalSaving, setModalSaving] = useState(false);
+
+	const allowedUserTypes = [
+		{ value: 'college_student', label: 'College Student' },
+		{ value: 'young_professional', label: 'Young Professional' },
+		{ value: 'family_moderate', label: 'Family (Moderate)' },
+		{ value: 'family_high', label: 'Family (High Income)' },
+		{ value: 'luxury_lifestyle', label: 'Luxury Lifestyle' },
+		{ value: 'senior_retired', label: 'Senior/Retired' }
+	];
+
+	// Fetch both dashboard data and profile in parallel on mount
+	useEffect(() => {
+		fetchAll();
+	}, []);
+
+	async function fetchAll() {
+		// run both; dashboard eventually sets loading false
 		setLoading(true);
+		setProfileLoading(true);
+		try {
+			await Promise.all([fetchDashboardData(), fetchProfile()]);
+		} finally {
+			setLoading(false);
+			setProfileLoading(false);
+		}
+	}
+
+	// Original fetchDashboardData logic (kept intact)
+	async function fetchDashboardData() {
 		try {
 			const res = await api.get("/api/expenses");
 			const expenses = res.data || [];
@@ -111,16 +148,104 @@ export default function Dashboard() {
 		} catch (error) {
 			console.error(error);
 			toast.error("Failed to load dashboard data");
-		} finally {
-			setLoading(false);
 		}
 	}
 
-	// IntersectionObserver to lazy-build when visible (only on mobile)
+	// Fetch profile (NEW) and decide whether to show welcome modal
+	async function fetchProfile() {
+		try {
+			const res = await api.get("/api/user/profile");
+			const userData = res.data.user || res.data;
+			setProfile(userData);
+
+			// prepare modal fields if missing
+			const hasBudget = userData?.monthlyBudget !== undefined && userData?.monthlyBudget !== null && userData?.monthlyBudget !== "";
+			const hasUserType = userData?.userType && userData.userType !== "";
+
+			// Only show popup if user lacks any of these and hasn't snoozed it
+			const snoozeKey = "seenBudgetPopup";
+			const snoozed = localStorage.getItem(snoozeKey);
+			// optional heuristic: only show for "new" accounts (created in last 14 days) OR always if missing
+			let isNew = false;
+			if (userData?.createdAt) {
+				try {
+					const created = new Date(userData.createdAt);
+					const days = (Date.now() - created.getTime()) / (1000 * 60 * 60 * 24);
+					isNew = days <= 14; // treat accounts created within 14 days as new
+				} catch (e) { isNew = false; }
+			}
+
+			// show if missing either field AND not snoozed
+			if ((!hasBudget || !hasUserType) && !snoozed) {
+				// If you prefer only for new accounts, uncomment next line
+				// if (isNew) {
+					setModalBudget(userData?.monthlyBudget || "");
+					setModalUserType(userData?.userType || "");
+					setTimeout(() => setShowWelcomeModal(true), 300); // small delay so page paints first
+				// }
+			}
+		} catch (error) {
+			console.error("Profile fetch error", error);
+			// don't annoy the user if profile fetch fails; dashboard still loads
+		}
+	}
+
+	// Save modal changes (patch same endpoint as Profile.jsx)
+	async function saveModalSettings(e) {
+		e && e.preventDefault();
+		setModalSaving(true);
+		try {
+			const payload = {};
+			if (modalBudget !== "") payload.monthlyBudget = Number(modalBudget);
+			if (modalUserType !== "") payload.userType = modalUserType;
+
+			if (Object.keys(payload).length === 0) {
+				toast.error("Please enter a budget or select an account type.");
+				setModalSaving(false);
+				return;
+			}
+
+			const res = await api.patch("/api/user/meta", payload);
+			if (res.data.success && res.data.user) {
+				setProfile(res.data.user);
+				toast.success("Profile updated!");
+				setShowWelcomeModal(false);
+				// mark as seen permanently
+				localStorage.setItem("seenBudgetPopup", "1");
+			} else {
+				toast.error(res.data?.message || "Failed to update profile");
+			}
+		} catch (error) {
+			console.error("Modal save error:", error);
+			toast.error(error?.response?.data?.message || "Failed to save settings");
+		} finally {
+			setModalSaving(false);
+		}
+	}
+
+	function snoozeModal() {
+		// snooze for 7 days
+		const expires = Date.now() + 7 * 24 * 60 * 60 * 1000;
+		localStorage.setItem("seenBudgetPopup", String(expires));
+		setShowWelcomeModal(false);
+		// store expiry timestamp so we can allow it after expiry
+	}
+
+	// check and clear snooze if expired
+	useEffect(() => {
+		const key = localStorage.getItem("seenBudgetPopup");
+		if (!key) return;
+		const ts = Number(key);
+		if (!Number.isNaN(ts)) {
+			// if it's a timestamp and already expired, remove it
+			if (Date.now() > ts) localStorage.removeItem("seenBudgetPopup");
+		}
+	}, []);
+
+	// IntersectionObserver to lazy-build when visible (only on mobile) - unchanged
 	useEffect(() => {
 		if (!isMobile) return undefined; // only observe on mobile
 
-		// more lenient: trigger when small part is visible; rootMargin pulls trigger earlier
 		const opts = { root: null, rootMargin: "0px 0px -120px 0px", threshold: [0, 0.05, 0.2] };
 
 		const obs = new IntersectionObserver((entries) => {
@@ -129,7 +254,6 @@ export default function Dashboard() {
 					const el = entry.target;
 					if (el === trendRef.current && !buildTrend) {
 						setBuildTrend(true);
-						// guaranteed fallback: if for some reason rendering lags, ensure build completes
 						setTimeout(() => setBuildTrend(true), 600);
 					}
 					if (el === pieRef.current && !buildPie) {
@@ -140,13 +264,11 @@ export default function Dashboard() {
 						setBuildProgress(true);
 						setTimeout(() => setBuildProgress(true), 600);
 					}
-					// unobserve once built to avoid repeated triggers
 					obs.unobserve(entry.target);
 				}
 			});
 		}, opts);
 
-		// attach dataset keys so logs are readable
 		if (trendRef.current) {
 			trendRef.current.dataset.key = "trend";
 			obs.observe(trendRef.current);
@@ -163,6 +285,7 @@ export default function Dashboard() {
 		return () => obs.disconnect();
 	}, [isMobile, buildTrend, buildPie, buildProgress]);
 
+	// Formatting helpers (unchanged)
 	const fmt = (v) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(v || 0);
 	const percentChange = stats.lastMonth === 0 ? 0 : ((stats.thisMonth - stats.lastMonth) / Math.abs(stats.lastMonth)) * 100;
 	const isIncrease = percentChange >= 0;
@@ -187,6 +310,7 @@ export default function Dashboard() {
 
 	return (
 		<div className="page-container" aria-live="polite">
+			{/* --- (the full original dashboard content stays the same) */}
 			<div className="header-row">
 				<div>
 					<h1 className="page-title">Dashboard</h1>
@@ -199,7 +323,7 @@ export default function Dashboard() {
 				</div>
 			</div>
 
-			{/* Stats Cards */}
+			{/* Stats Cards (unchanged) */}
 			<div className="stats-grid" role="list">
 				<div className="card-body stat" role="listitem" aria-label="This month">
 					<div>
@@ -238,82 +362,42 @@ export default function Dashboard() {
 				</div>
 			</div>
 
-			{/* Charts */}
+			{/* Charts (unchanged) */}
 			<div className="charts-sections">
 				<div ref={trendRef} className="chart-card card-body">
 					<div className="card-title">6-Month Trend</div>
-
-					{/* render LineChart only when buildTrend is true */}
 					{buildTrend ? (
 						stats.last6Months && stats.last6Months.length > 0 ? (
 							<ResponsiveContainer width="100%" height={300}>
 								<LineChart data={stats.last6Months} margin={{ top: 8, right: 12, left: -8, bottom: 8 }}>
 									<CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-									<XAxis
-										dataKey="month"
-										stroke="var(--text-secondary)"
-										tick={{ fill: "var(--text-secondary)", fontSize: 12 }} />
-									<YAxis
-										stroke="var(--text-secondary)"
-										tick={{ fill: "var(--text-secondary)", fontSize: 12 }}
-									/>
-									<Tooltip
-										formatter={(value) => [`${fmt(value)}`, "Amount"]}
-										contentStyle={{ background: "var(--card-bg)", borderColor: "var(--border-color)", color: "var(--text-primary)" }}
-										labelStyle={{ color: "var(--text-secondary)" }}
-									/>
-									<Line
-										type="monotone"
-										dataKey="amount"
-										stroke="var(--accent-primary)"
-										strokeWidth={3}
-										dot={{ r: 4 }}
-										activeDot={{ r: 6 }}
-									/>
+									<XAxis dataKey="month" stroke="var(--text-secondary)" tick={{ fill: "var(--text-secondary)", fontSize: 12 }}/>
+									<YAxis stroke="var(--text-secondary)" tick={{ fill: "var(--text-secondary)", fontSize: 12 }} />
+									<Tooltip formatter={(value) => [`${fmt(value)}`, "Amount"]} contentStyle={{ background: "var(--card-bg)", borderColor: "var(--border-color)", color: "var(--text-primary)" }} labelStyle={{ color: "var(--text-secondary)" }} />
+									<Line type="monotone" dataKey="amount" stroke="var(--accent-primary)" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
 								</LineChart>
 							</ResponsiveContainer>
 						) : <p className="no-data">No trend data</p>
 					) : (
 						<div style={{ height: 300, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
 							<div style={{ color: 'var(--muted)' }}>Scroll to build chart</div>
-							<button
-								onClick={() => setBuildTrend(true)}
-								className="build-button"
-								aria-label="Build trend chart"
-							>
-								Tap to build
-							</button>
+							<button onClick={() => setBuildTrend(true)} className="build-button" aria-label="Build trend chart">Tap to build</button>
 						</div>
 					)}
 				</div>
 
 				<div ref={pieRef} className="chart-card card-body">
 					<div className="card-title"><PieIcon size={18} /> Category Distribution</div>
-
-					{/* render Pie only when buildPie is true */}
 					{buildPie ? (
 						pieChartData.length > 0 ? (
 							<div className="pie-chart-container">
 								<ResponsiveContainer width="100%" height={260}>
 									<RechartsPieChart>
-										<Pie
-											data={pieChartData}
-											dataKey="value"
-											nameKey="name"
-											cx="50%"
-											cy="50%"
-											outerRadius={80}
-											innerRadius={28}
-											paddingAngle={3}
-											label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-										>
-											{pieChartData.map((entry, index) => (
-												<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-											))}
+										<Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={28} paddingAngle={3} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+											{pieChartData.map((entry, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
 										</Pie>
 									</RechartsPieChart>
 								</ResponsiveContainer>
-
 								<div className="pie-legend" role="list" aria-label="Category legend">
 									{pieChartData.map((entry, index) => (
 										<div className="legend-item" key={entry.name} role="listitem">
@@ -327,19 +411,13 @@ export default function Dashboard() {
 					) : (
 						<div style={{ height: 300, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
 							<div style={{ color: 'var(--muted)' }}>Scroll to build chart</div>
-							<button
-								onClick={() => setBuildTrend(true)}
-								className="build-button"
-								aria-label="Build trend chart"
-							>
-								Tap to build
-							</button>
+							<button onClick={() => setBuildTrend(true)} className="build-button" aria-label="Build trend chart">Tap to build</button>
 						</div>
 					)}
 				</div>
 			</div>
 
-			{/* Recent & Top */}
+			{/* Recent & Top (unchanged) */}
 			<div ref={topCategoriesRef} className="recent-expenses-top-categories-card">
 				<div className="card-body">
 					<h2 className="card-title">Recent Expenses</h2>
@@ -370,7 +448,6 @@ export default function Dashboard() {
 							<p className="no-data">No spending data this month</p>
 						) : topCategories.map(([category, amount], index) => {
 							const percentage = stats.thisMonth ? (amount / stats.thisMonth) * 100 : 0;
-							// if not yet requested to build progress, keep width 0; otherwise set percentage
 							const fillValue = buildProgress ? percentage : 0;
 							return (
 								<div key={category} className="expense-category-item" aria-label={`Category ${category}`}>
@@ -382,13 +459,8 @@ export default function Dashboard() {
 										<span className="expense-category-amount">{fmt(amount)}</span>
 									</div>
 									<div className="category-progress-bar" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-										{/* custom progress bar so we can animate width */}
 										<div className="progress-track" aria-hidden="true">
-											<div
-												className="progress-fill"
-												style={{ width: `${Math.min(100, fillValue)}%` }}
-												data-percent={fillValue.toFixed(1)}
-											/>
+											<div className="progress-fill" style={{ width: `${Math.min(100, fillValue)}%` }} data-percent={fillValue.toFixed(1)} />
 										</div>
 										<span className="percentage-text" style={{ minWidth: 54, textAlign: 'right', color: 'var(--muted)' }}>
 											{buildProgress ? `${percentage.toFixed(1)}%` : `0%`}
@@ -403,7 +475,7 @@ export default function Dashboard() {
 				</div>
 			</div>
 
-			{/* Quick actions */}
+			{/* Quick actions (unchanged) */}
 			<div className="quick-action-card">
 				<div className="card-body">
 					<h2 className="card-title">Quick Actions</h2>
@@ -423,6 +495,57 @@ export default function Dashboard() {
 					</div>
 				</div>
 			</div>
+
+			{/* --- WELCOME / BUDGET MODAL (NEW) */}
+			{showWelcomeModal && (
+				<div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Welcome to Expense Keeper">
+					<div className="modal-card">
+						<div className="modal-header">
+							<h3>Welcome! Set your monthly budget & account type</h3>
+							<p className="muted" style={{ marginTop: 6 }}>
+								Setting these helps personalize suggestions and track goals.
+							</p>
+						</div>
+
+						<form className="modal-form" onSubmit={saveModalSettings}>
+							<label className="modal-field">
+								<span className="modal-label">Monthly budget (₹)</span>
+								<input
+									type="number"
+									step="0.01"
+									min="0"
+									placeholder="e.g. 20000"
+									value={modalBudget}
+									onChange={(e) => setModalBudget(e.target.value)}
+								/>
+							</label>
+
+							<label className="modal-field">
+								<span className="modal-label">Account type</span>
+								<select value={modalUserType} onChange={(e) => setModalUserType(e.target.value)}>
+									<option value="">Select account type</option>
+									{allowedUserTypes.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}
+								</select>
+							</label>
+
+							<div className="modal-actions">
+								<button type="submit" className="btn-primary" disabled={modalSaving}>
+									{modalSaving ? "Saving..." : "Save"}
+								</button>
+								<button type="button" className="btn-ghost" onClick={() => { setShowWelcomeModal(false); }}>
+									Close
+								</button>
+								<button type="button" className="btn-snooze" onClick={snoozeModal}>
+									Remind me later
+								</button>
+								<button type="button" className="btn-link" onClick={() => { setShowWelcomeModal(false); nav('/profile'); }}>
+									Go to Profile
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

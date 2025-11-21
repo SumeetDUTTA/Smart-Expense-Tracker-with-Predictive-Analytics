@@ -359,6 +359,122 @@
 		box-shadow: var(--shadow-lg);
 }
 
+/* Welcome modal for new users */
+.modal-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(10, 10, 10, 0.45);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1200;
+	padding: 20px;
+}
+
+.modal-card {
+	background: var(--card-bg);
+	border-radius: 12px;
+	padding: 20px;
+	width: 100%;
+	max-width: 640px;
+	box-shadow: var(--shadow-lg);
+	border: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+	margin: 0;
+	font-size: 18px;
+	color: var(--text-primary);
+}
+
+.modal-header .muted {
+	color: var(--text-secondary);
+	font-size: 13px;
+}
+
+.modal-form {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin-top: 12px;
+}
+
+.modal-field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.modal-label {
+	font-size: 13px;
+	color: var(--text-secondary);
+}
+
+.modal-field input,
+.modal-field select {
+	padding: 10px 12px;
+	border-radius: 8px;
+	border: 1px solid var(--border-color);
+	background: var(--card-hover-bg);
+	color: var(--text-primary);
+	font-size: 14px;
+}
+
+.modal-actions {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	justify-content: flex-end;
+	margin-top: 6px;
+	flex-wrap: wrap;
+}
+
+.btn-primary {
+	background: var(--accent-gradient);
+	border: none;
+	padding: 10px 14px;
+	border-radius: 10px;
+	color: var(--text-primary);
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.btn-ghost {
+	background: transparent;
+	border: 1px solid var(--border-color);
+	padding: 10px 12px;
+	border-radius: 10px;
+	cursor: pointer;
+}
+
+.btn-snooze {
+	background: transparent;
+	color: var(--text-secondary);
+	border: none;
+	padding: 8px 10px;
+	cursor: pointer;
+}
+
+.btn-link {
+	background: transparent;
+	color: var(--accent-primary);
+	border: none;
+	padding: 8px 10px;
+	cursor: pointer;
+	font-weight: 700;
+}
+
+@media (max-width: 520px) {
+	.modal-card {
+		max-width: 100%;
+		padding: 16px;
+	}
+	.modal-actions {
+		justify-content: stretch;
+	}
+}
+
+
 @media (max-width: 1024px) {
 		.stats-grid {
 				grid-template-columns: repeat(2, 1fr);
