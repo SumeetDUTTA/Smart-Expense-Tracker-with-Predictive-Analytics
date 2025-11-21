@@ -340,14 +340,14 @@ export default function ShowExpenses() {
 									{categoryData.length === 0 ? (
 										<div className="no-data">No data</div>
 									) : (
-										<div style={{ width: '100%', height: '100%' }} className="pie-chart-wrapper">
+										<div style={{ width: '100%', height: 380 }} className="pie-chart-wrapper">
 											<ResponsiveContainer width="100%" height="100%">
-												<PieChart data={chartData} margin={{ top: 8, right: 24, left: 24, bottom: 12 }}>
+												<PieChart margin={{ top: 20, right: 24, left: 24, bottom: 12 }}>
 													<Pie
 														data={categoryData}
-														cx={window.innerWidth < 768 ? "50%" : "50%"}
-														cy={window.innerWidth < 768 ? "50%" : "35%"}
-														outerRadius={window.innerWidth < 768 ? 80 : 100}
+														cx="50%"
+														cy={window.innerWidth < 768 ? "45%" : "40%"}
+														outerRadius={window.innerWidth < 768 ? 70 : 90}
 														labelLine={false}
 														label={false}
 														fill="var(--accent-primary)"
