@@ -1,11 +1,14 @@
 import axios from "axios";
 
-// Always use /api - Vite proxy handles dev mode routing to localhost:5000
+const BASE = import.meta.evn.VITE_API_TARGET || "http://localhost:5000"
+
 const api = axios.create({
-    baseURL: "/api",
+    baseURL: BASE,
+    withCredentials: true,
     headers: {
     "Content-Type": "application/json",
   },
+    timeout: 30000,
 });
 
 api.interceptors.request.use((config) => {
