@@ -9,7 +9,7 @@ import auth from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.use(auth);
+// Public routes (no auth required)
 router.post('/register', validate(registerSchema), register);
 router.post('/login', validate(loginSchema), login);
 
