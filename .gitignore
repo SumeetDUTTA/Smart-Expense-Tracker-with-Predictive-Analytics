@@ -12,6 +12,10 @@ mlModel/.ipynb_checkpoints/
 *.pyc
 __pycache__/
 
+# Backup files
+backend/*_backup.js
+*_complex_backup.js
+
 # OS files
 .DS_Store
 Thumbs.db
@@ -40,3 +44,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+

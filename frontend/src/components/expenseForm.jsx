@@ -96,6 +96,7 @@ export default function ExpenseForm({ onSubmit, initial = {}, submitting = false
               className="ef-input ef-date"
               type="date"
               value={date}
+              max={new Date().toISOString().slice(0, 10)}
               onChange={(e) => setDate(e.target.value)}
               disabled={submitting}
               aria-label="Date of expense"

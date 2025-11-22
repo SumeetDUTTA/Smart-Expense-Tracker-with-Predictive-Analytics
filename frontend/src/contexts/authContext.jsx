@@ -35,7 +35,7 @@ function AuthProvider({ children }) {
     async function login(credentials) {
         try {
             const res = await api.post("/api/auth/login", credentials).
-                then(r => console.log('Login response:', r) || r).
+                // then(r => console.log('Login response:', r) || r).
                 catch(err => {
                     console.error('Login error full:', err);
                     if (err.response) {

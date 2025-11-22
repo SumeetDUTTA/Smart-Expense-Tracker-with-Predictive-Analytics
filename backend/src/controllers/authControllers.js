@@ -1,8 +1,19 @@
-import User from '../models/user.js';
+import dotenv from 'dotenv';
+dotenv.config();
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import axios from 'axios';
 
 import ApiError from '../utils/ApiError.js';
+import User from '../models/user.js';
+
+async function wakeMlServer() {
+  const WAKE_URL = `${process.env.ML_WAKE_URL}/docs` || 'https:localhost:8000/docs';
+
+  axios.get(WAKE_URL, { timeout: 3000 })
+    .then(() => console.log('ML server wake ping sent OK'))
+    .catch(err => console.debug('ML wake ping failed (ignored):', err.message));
+}
 
 function signToken(userID) {
     return jwt.sign({ id: userID }, process.env.JWT_SECRET, {
@@ -11,8 +22,6 @@ function signToken(userID) {
 }
 
 async function register(req, res, next) {
-    console.log('REGISTER attempt at', new Date().toISOString());
-    console.log('Request body:', JSON.stringify(req.body));
     try {
         const { name, email, password } = req.body;
         const exists = await User.findOne({ email });
@@ -24,14 +33,13 @@ async function register(req, res, next) {
             user: { id: user._id, name: user.name, email: user.email },
             token,
         });
+        wakeMlServer();
     } catch (error) {
         next(error);
     }
 }
 
 async function login(req, res, next) {
-    console.log('LOGIN attempt at', new Date().toISOString());
-    console.log('Request body:', JSON.stringify(req.body));
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email }).select('+password');
@@ -44,6 +52,7 @@ async function login(req, res, next) {
             user: { id: user._id, name: user.name, email: user.email },
             token,
         });
+        wakeMlServer();
     } catch (error) {
         next(error);
     }

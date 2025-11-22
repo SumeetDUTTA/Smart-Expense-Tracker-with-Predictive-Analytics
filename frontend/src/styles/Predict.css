@@ -1,10 +1,4 @@
-/* --------------------------------------------------------------------------
-   CSS: Replace your ../styles/Predict.css with the CSS below. It is written
-   to be compact, responsive, and visually consistent with the existing app.
-   -------------------------------------------------------------------------- */
-
-/* Paste the following into src/styles/Predict.css (replace the old file) */
-
+/* Predict.css */
 :root {
 	--bg: var(--bg-primary);
 	--panel: var(--card-bg);
@@ -87,7 +81,7 @@
 	display: grid;
 	grid-template-columns: 1fr 320px;
 	gap: 18px;
-	align-items: start;
+	align-items: stretch;
 }
 
 @media (max-width:880px) {
@@ -96,10 +90,18 @@
 	}
 }
 
+.form-card {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+}
+
 .form-card .form-row {
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
+	width: 100%;
 }
 
 .label {
@@ -158,12 +160,15 @@
 .page-button {
 	display: inline-flex;
 	align-items: center;
+	justify-content: center;
 	gap: 8px;
 	padding: 10px 14px;
 	border-radius: 10px;
 	border: none;
 	cursor: pointer;
 	font-weight: 700;
+	min-width: 220px;
+	margin-top: 10px;
 }
 
 .page-button.primary {

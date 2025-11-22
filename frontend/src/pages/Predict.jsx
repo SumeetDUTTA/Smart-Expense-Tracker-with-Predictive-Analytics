@@ -47,7 +47,7 @@ export default function Predict() {
 			const res = await api.post('/api/predict', { horizonDates: Number(horizon) })
 			setResult(res.data)
 			setShowBreakdown(false)
-			console.log('Prediction result:', res.data)
+			// console.log('Prediction result:', res.data)
 			toast.success('Prediction generated successfully!')
 		} catch (e) {
 			const errorMsg = e.response?.data?.message || e.message
@@ -63,7 +63,7 @@ export default function Predict() {
 	let totalPredArray = []
 	try {
 		totalPredArray = normalizeTotalPrediction(totalPredRaw) || []
-		console.log('Normalized total_prediction:', totalPredArray)
+		// console.log('Normalized total_prediction:', totalPredArray)
 	} catch (err) {
 		console.error('Error normalizing total_prediction:', err, totalPredRaw)
 		totalPredArray = []
@@ -185,9 +185,11 @@ export default function Predict() {
 						</div>
 					) : (
 						<>
-							<p className="card-text small muted">Projected total</p>
-							<h3 className="stats-value">{totalDisplay != null ? `₹${Number(totalDisplay).toFixed(0)}` : '—'}</h3>
-							<p className="card-text small muted">Next {horizon} {horizon === 1 ? 'month' : 'months'}</p>
+							<p className="card-text small muted">
+								Total Predicted
+							</p>
+							<h2 className="stats-value">₹{Number(totalDisplay || 0).toFixed(0)}</h2>
+							<p className="card-text small muted">For the next {horizon} {horizon === 1 ? 'month' : 'months'}</p>
 						</>
 					)}
 				</div>
@@ -211,11 +213,9 @@ export default function Predict() {
 						<div className="card-body predict-summary-card">
 							<div className="predict-summary-content">
 								<div>
-									<p className="predict-summary-title">
-										<DollarSign size={16} /> Total Predicted
-									</p>
-									<h2 className="predict-summary-value">₹{Number(totalDisplay || 0).toFixed(0)}</h2>
-									<p className="card-text small muted">For the next {horizon} {horizon === 1 ? 'month' : 'months'}</p>
+									<p className="predict-summary-title">Projected Value</p>
+									<h3 className="predict-summary-value">{totalDisplay != null ? `₹${Number(totalPredArray[0]).toFixed(0)}` : '—'}</h3>
+									<p className="card-text small muted"> For next month</p>
 								</div>
 								<div className="predict-summary-icon">
 									<TrendingUp size={44} />

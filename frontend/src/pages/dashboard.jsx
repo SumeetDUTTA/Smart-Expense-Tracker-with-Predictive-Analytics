@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -15,11 +16,14 @@ import {
 import toast from "react-hot-toast";
 import api from "../lib/api";
 import "../styles/Dashboard.css";
+import Popup from "../components/popUp";
+import "../styles/popUp.css";
+import { useAuth } from "../contexts/authContext";
 
 export default function Dashboard() {
 
-
 	const nav = useNavigate();
+	const { token } = useAuth();
 
 	// Dashboard stats (unchanged)
 	const [stats, setStats] = useState({
@@ -63,6 +67,8 @@ export default function Dashboard() {
 	const [modalUserType, setModalUserType] = useState("");
 	const [modalSaving, setModalSaving] = useState(false);
 
+	const welcomeModalTimeoutRef = useRef(null);
+
 	const allowedUserTypes = [
 		{ value: 'college_student', label: 'College Student' },
 		{ value: 'young_professional', label: 'Young Professional' },
@@ -78,14 +84,28 @@ export default function Dashboard() {
 	}, []);
 
 	async function fetchAll() {
+		// Only fetch if user is authenticated
+		if (!token) {
+			setLoading(false);
+			setProfileLoading(false);
+			return;
+		}
+
 		// run both; dashboard eventually sets loading false
 		setLoading(true);
 		setProfileLoading(true);
 		try {
-			await Promise.all([fetchDashboardData(), fetchProfile()]);
+			await fetchDashboardData();
+
+			// delay profile fetch itself by 5 seconds
+			if (welcomeModalTimeoutRef.current) clearTimeout(welcomeModalTimeoutRef.current);
+			welcomeModalTimeoutRef.current = setTimeout(() => {
+				fetchProfile();
+				welcomeModalTimeoutRef.current = null;
+			}, 5000);
 		} finally {
 			setLoading(false);
-			setProfileLoading(false);
+			// profileLoading will be updated inside fetchProfile()
 		}
 	}
 
@@ -154,48 +174,77 @@ export default function Dashboard() {
 
 	// Fetch profile (NEW) and decide whether to show welcome modal
 	async function fetchProfile() {
+		setProfileLoading(true);
 		try {
 			const res = await api.get("/api/user/profile");
-			const userData = res.data.user || res.data;
+			const userData = res.data?.user || res.data || null;
 			setProfile(userData);
 
-			// prepare modal fields if missing
-			const hasBudget = userData?.monthlyBudget !== undefined && userData?.monthlyBudget !== null && userData?.monthlyBudget !== "";
-			const hasUserType = userData?.userType && userData.userType !== "";
-
-			// Only show popup if user lacks any of these and hasn't snoozed it
-			const snoozeKey = "seenBudgetPopup";
-			const snoozed = (() => {
-				const v = localStorage.getItem(snoozeKey);
-				if (!v) return false;
-				const ts = Number(v);
-				if (!Number.isNaN(ts)) {
-					return Date.now() < ts; // snoozed if timestamp is in future
-				}
-				return v === "1"; // legacy or permanent seen
-			})();
-			// optional heuristic: only show for "new" accounts (created in last 14 days) OR always if missing
-			let isNew = false;
-			if (userData?.createdAt) {
-				try {
-					const created = new Date(userData.createdAt);
-					const days = (Date.now() - created.getTime()) / (1000 * 60 * 60 * 24);
-					isNew = days <= 14; // treat accounts created within 14 days as new
-				} catch (e) { isNew = false; }
-			}
-
-			// show if missing either field AND not snoozed
-			if ((!hasBudget || !hasUserType) && !snoozed) {
-				// If you prefer only for new accounts, uncomment next line
-				// if (isNew) {
-				setModalBudget(userData?.monthlyBudget || "");
-				setModalUserType(userData?.userType || "");
-				setTimeout(() => setShowWelcomeModal(true), 300); // small delay so page paints first
-				// }
-			}
+			decideAndShowModal(userData);
 		} catch (error) {
-			console.error("Profile fetch error", error);
-			// don't annoy the user if profile fetch fails; dashboard still loads
+			console.error('Profile fetch error', error);
+			// Retry once after short delay in case auth settles
+			setTimeout(() => {
+				try { fetchProfile(); } catch (_) { /* swallow */ }
+			}, 1500);
+		} finally {
+			setProfileLoading(false);
+		}
+	}
+
+	function decideAndShowModal(userData) {
+		try {
+			const requireNewAccount = true;
+			const NEW_ACCOUNT_DAYS = 14; // same as before for "new account"
+			const IGNORE_SNOOZE_FOR_NEW_DAYS = 3; // <= this many days, ignore existing snooze and show modal
+
+			// Raw snooze value (timestamp or "1")
+			const raw = localStorage.getItem('seenBudgetPopup');
+			const snoozed = (() => {
+				if (!raw) return false;
+				const ts = Number(raw);
+				if (!Number.isNaN(ts)) return Date.now() < ts;
+				return raw === '1';
+			})();
+
+			// Determine if user is "new"
+			let isNewAccount = true;
+			if (requireNewAccount && userData?.createdAt) {
+				try {
+					const created = new Date(userData.createdAt).getTime();
+					const days = (Date.now() - created) / (1000 * 60 * 60 * 24);
+					isNewAccount = days <= NEW_ACCOUNT_DAYS;
+				} catch (e) {
+					isNewAccount = true;
+				}
+			}
+
+			// If account is *very* new, ignore snooze so they see the modal
+			const createdAgeDays = userData?.createdAt ? (Date.now() - new Date(userData.createdAt).getTime()) / (1000 * 60 * 60 * 24) : Infinity;
+			const ignoreSnoozeBecauseNew = createdAgeDays <= IGNORE_SNOOZE_FOR_NEW_DAYS;
+
+			const effectiveSnoozed = snoozed && !ignoreSnoozeBecauseNew;
+
+			// Presence checks: budget > 0 and userType non-empty are considered set
+			const budgetVal = userData?.monthlyBudget;
+			const hasMeaningfulBudget = (budgetVal !== undefined && budgetVal !== null) ? Number(budgetVal) > 0 : false;
+			const uType = userData?.userType;
+			const hasUserType = (uType !== undefined && uType !== null && String(uType).trim() !== "");
+
+			const missingData = !hasMeaningfulBudget || !hasUserType;
+
+			if (missingData && !effectiveSnoozed && (!requireNewAccount || isNewAccount)) {
+				setModalBudget(userData?.monthlyBudget ?? "");
+				setModalUserType(userData?.userType ?? "");
+				if (welcomeModalTimeoutRef.current) clearTimeout(welcomeModalTimeoutRef.current);
+				welcomeModalTimeoutRef.current = setTimeout(() => {
+					setShowWelcomeModal(true);
+					welcomeModalTimeoutRef.current = null;
+				}, 5000);
+				return;
+			}
+		} catch (err) {
+			console.error('decideAndShowModal error', err);
 		}
 	}
 
@@ -215,12 +264,17 @@ export default function Dashboard() {
 			}
 
 			const res = await api.patch("/api/user/meta", payload);
-			if (res.data.success && res.data.user) {
+			if (res.data?.success && res.data?.user) {
 				setProfile(res.data.user);
 				toast.success("Profile updated!");
-				setShowWelcomeModal(false);
-				// mark as seen permanently
+				// mark as permanently seen
 				localStorage.setItem("seenBudgetPopup", "1");
+				// clear any pending modal timer
+				if (welcomeModalTimeoutRef.current) {
+					clearTimeout(welcomeModalTimeoutRef.current);
+					welcomeModalTimeoutRef.current = null;
+				}
+				setShowWelcomeModal(false);
 			} else {
 				toast.error(res.data?.message || "Failed to update profile");
 			}
@@ -232,12 +286,27 @@ export default function Dashboard() {
 		}
 	}
 
+	function closeModalNoSave() {
+		// mark as seen permanently; user explicitly closed popup
+		localStorage.setItem("seenBudgetPopup", "1");
+		// clear any pending modal timer
+		if (welcomeModalTimeoutRef.current) {
+			clearTimeout(welcomeModalTimeoutRef.current);
+			welcomeModalTimeoutRef.current = null;
+		}
+		setShowWelcomeModal(false);
+	}
+
 	function snoozeModal() {
-		// snooze for 7 days
+		// snooze for 7 days (store timestamp ms)
 		const expires = Date.now() + 7 * 24 * 60 * 60 * 1000;
 		localStorage.setItem("seenBudgetPopup", String(expires));
+		// clear any pending modal timer
+		if (welcomeModalTimeoutRef.current) {
+			clearTimeout(welcomeModalTimeoutRef.current);
+			welcomeModalTimeoutRef.current = null;
+		}
 		setShowWelcomeModal(false);
-		// store expiry timestamp so we can allow it after expiry
 	}
 
 	// check and clear snooze if expired
@@ -249,6 +318,16 @@ export default function Dashboard() {
 			// if it's a timestamp and already expired, remove it
 			if (Date.now() > ts) localStorage.removeItem("seenBudgetPopup");
 		}
+	}, []);
+
+	// Clear scheduled modal timeout on unmount
+	useEffect(() => {
+		return () => {
+			if (welcomeModalTimeoutRef.current) {
+				clearTimeout(welcomeModalTimeoutRef.current);
+				welcomeModalTimeoutRef.current = null;
+			}
+		};
 	}, []);
 
 	// IntersectionObserver to lazy-build when visible (only on mobile) - unchanged
@@ -505,56 +584,19 @@ export default function Dashboard() {
 				</div>
 			</div>
 
-			{/* --- WELCOME / BUDGET MODAL (NEW) */}
-			{showWelcomeModal && (
-				<div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Welcome to Expense Keeper">
-					<div className="modal-card">
-						<div className="modal-header">
-							<h3>Welcome! Set your monthly budget & account type</h3>
-							<p className="muted" style={{ marginTop: 6 }}>
-								Setting these helps personalize suggestions and track goals.
-							</p>
-						</div>
-
-						<form className="modal-form" onSubmit={saveModalSettings}>
-							<label className="modal-field">
-								<span className="modal-label">Monthly budget (₹)</span>
-								<input
-									type="number"
-									step="0.01"
-									min="0"
-									placeholder="e.g. 20000"
-									value={modalBudget}
-									onChange={(e) => setModalBudget(e.target.value)}
-								/>
-							</label>
-
-							<label className="modal-field">
-								<span className="modal-label">Account type</span>
-								<select value={modalUserType} onChange={(e) => setModalUserType(e.target.value)}>
-									<option value="">Select account type</option>
-									{allowedUserTypes.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}
-								</select>
-							</label>
-
-							<div className="modal-actions">
-								<button type="submit" className="btn-primary" disabled={modalSaving}>
-									{modalSaving ? "Saving..." : "Save"}
-								</button>
-								<button type="button" className="btn-ghost" onClick={() => { setShowWelcomeModal(false); }}>
-									Close
-								</button>
-								<button type="button" className="btn-snooze" onClick={snoozeModal}>
-									Remind me later
-								</button>
-								<button type="button" className="btn-link" onClick={() => { setShowWelcomeModal(false); nav('/profile'); }}>
-									Go to Profile
-								</button>
-							</div>
-						</form>
-					</div>
-				</div>
-			)}
+			{/* Popup (extracted) */}
+			<Popup
+				visible={showWelcomeModal}
+				budget={modalBudget}
+				userType={modalUserType}
+				saving={modalSaving}
+				onBudgetChange={(v) => setModalBudget(v)}
+				onUserTypeChange={(v) => setModalUserType(v)}
+				onSave={saveModalSettings}
+				onClose={closeModalNoSave}
+				onSnooze={snoozeModal}
+				allowedUserTypes={allowedUserTypes}
+			/>
 		</div>
 	);
 }

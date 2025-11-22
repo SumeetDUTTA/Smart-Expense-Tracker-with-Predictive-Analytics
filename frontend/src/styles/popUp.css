@@ -1,0 +1,156 @@
+/* popup.css - ExpenseKeeper modal styles (minimal & customizable) */
+
+.ek-modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 10, 15, 0.45);
+  z-index: 1200;
+  padding: 16px;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.ek-modal-card {
+  width: 100%;
+  max-width: 680px;
+  background: var(--card-bg, #fff);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(2,6,23,0.35);
+  padding: 20px;
+  color: var(--text-primary, #111827);
+  border: 1px solid var(--border-color, #e6e9ee);
+}
+
+.ek-modal-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.ek-muted {
+  color: var(--muted, #6b7280);
+  margin-top: 6px;
+  font-size: 0.94rem;
+}
+
+.ek-modal-form {
+  margin-top: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.ek-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ek-modal-label {
+  font-size: 0.88rem;
+  color: var(--muted, #6b7280);
+}
+
+.ek-modal-field input,
+.ek-modal-field select {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #e6e9ee);
+  font-size: 0.98rem;
+  outline: none;
+  background: var(--input-bg, #fff);
+  color: var(--text-primary, #111827);
+}
+
+.ek-modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.ek-btn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.ek-btn-primary {
+  background: var(--accent-primary, #6366f1);
+  color: white;
+  border-color: rgba(0,0,0,0.04);
+}
+
+.ek-btn-ghost {
+  background: transparent;
+  color: var(--text-primary, #111827);
+  border-color: var(--border-color, #e6e9ee);
+}
+
+.ek-btn-snooze {
+  background: transparent;
+  color: var(--muted, #6b7280);
+  border-color: transparent;
+}
+
+.ek-btn-link {
+  background: transparent;
+  color: var(--accent-primary, #6366f1);
+  border: none;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .ek-modal-overlay {
+    padding: 12px;
+  }
+
+  .ek-modal-card {
+    max-width: 100%;
+    padding: 16px;
+  }
+
+  .ek-modal-header h3 {
+    font-size: 1rem;
+  }
+
+  .ek-muted {
+    font-size: 0.875rem;
+  }
+
+  .ek-modal-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ek-btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .ek-modal-field input,
+  .ek-modal-field select {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+@media (max-width: 420px) {
+  .ek-modal-card {
+    padding: 12px;
+  }
+
+  .ek-modal-header h3 {
+    font-size: 0.95rem;
+  }
+
+  .ek-btn {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+}

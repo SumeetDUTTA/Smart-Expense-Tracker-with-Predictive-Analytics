@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const base = process.env.ML_API_URL || 'http://localhost:8000';
-console.log(`ML Service using API URL: ${base}`);
 
 // Simple helper function
 function clamp(value, min, max) {
@@ -23,29 +22,30 @@ function recentMean(series, window = 6) {
 function statisticalFallback(categories, horizon = 1) {
     const results = {};
     let totalPredictions = [];
-    
+
     for (const [cat, series] of Object.entries(categories)) {
         const mean = recentMean(series, 6);
         const growth = 1.02; // 2% modest growth
         const predictions = Array(horizon).fill(0).map(() => Math.round(mean * growth));
         results[cat] = predictions;
-        
+
         predictions.forEach((val, i) => {
             totalPredictions[i] = (totalPredictions[i] || 0) + val;
         });
     }
-    
+
     return {
         categories: results,
         total: totalPredictions,
-        predictionMethod: 'statistical_fallback'
+        predictionMethod: 'statistical_fallback',
+        used_fallback: true
     };
 }
 
 // Main prediction function - SIMPLIFIED
 export async function forecast(categories, h = 1, meta = {}) {
     console.log('🤖 Starting ML prediction...');
-    
+
     try {
         // Try ML prediction first
         const url = `${base.replace(/\/$/, '')}/predict`;
@@ -61,44 +61,41 @@ export async function forecast(categories, h = 1, meta = {}) {
             timeout: 60000,
             headers: { 'Content-Type': 'application/json' }
         });
-        
+
         console.log('✅ ML prediction successful!');
-        
+
         // Simple processing - just clean up the ML results
         const cleanCats = {};
         const recomputedTotal = [];
-        
+
         for (const [cat, vals] of Object.entries(response.categories || {})) {
             const predicted = Array.isArray(vals) ? vals.map(Number) : [];
             if (predicted.length === 0) {
                 cleanCats[cat] = [];
                 continue;
             }
-            
-            // Simple approach: trust the ML model with basic bounds
-            const rawMean = predicted.reduce((a, b) => a + b, 0) / predicted.length;
-            
+
             // Just ensure values are positive and reasonable (not more than 50K per category)
             const cleaned = predicted.map(v => clamp(Math.round(v), 0, 50000));
             cleanCats[cat] = cleaned;
-            
+
+            // Sum across categories for each month
             cleaned.forEach((v, i) => {
                 recomputedTotal[i] = (recomputedTotal[i] || 0) + v;
             });
         }
         const userTotalBudget = meta.user_total_budget || 0;
         const userType = meta.user_type || 'college_student';
-        
-        const totalAvg = recomputedTotal.reduce((a, b) => a + b, 0) / recomputedTotal.length;
-        
+
         return {
             categories: cleanCats,
-            total: totalAvg,
+            total: recomputedTotal,
             predictionMethod: 'ml_model',
+            used_fallback: false,
             user_total_budget: userTotalBudget,
             user_type: userType
         };
-        
+
     } catch (err) {
         console.log(`❌ ML prediction failed: ${err.message} - using statistical fallback`);
         return statisticalFallback(categories, h);

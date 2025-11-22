@@ -1,7 +1,7 @@
 import { forecast } from "../mlServices/mlService.js";
 import Expense from "../models/expense.js";
 import redisClient from "../utils/redisClient.js";
-import  { notFound, errorHandler} from "../middleware/errorHandler.js";
+import { notFound, errorHandler } from "../middleware/errorHandler.js";
 
 export async function predict(req, res, next) {
     try {
@@ -26,13 +26,15 @@ export async function predict(req, res, next) {
         // Get user's expense data grouped by month and category
         const rows = await Expense.aggregate([
             { $match: { user: req.user._id } },
-            { $group: {
-                _id: { 
-                    month: { $dateToString: { format: "%Y-%m", date: "$date" } },
-                    category: "$category",
-                },
-                total: { $sum: "$amount" }
-            }},
+            {
+                $group: {
+                    _id: {
+                        month: { $dateToString: { format: "%Y-%m", date: "$date" } },
+                        category: "$category",
+                    },
+                    total: { $sum: "$amount" }
+                }
+            },
             { $sort: { "_id.month": 1 } }
         ]);
 
@@ -44,7 +46,7 @@ export async function predict(req, res, next) {
         const uniqueMonths = [...new Set(rows.map(r => r._id.month))].sort();
         const categoriesSet = new Set(rows.map(r => r._id.category || 'Uncategorized'));
         const categoryMap = {};
-        
+
         // Initialize category arrays
         for (const cat of categoriesSet) {
             categoryMap[cat] = Array(uniqueMonths.length).fill(0);
@@ -70,23 +72,24 @@ export async function predict(req, res, next) {
             // Simple fallback: use recent averages with small growth
             const results = {};
             let totalPredictions = [];
-            
+
             for (const [cat, series] of Object.entries(categoryMap)) {
                 const nonZero = series.filter(v => v > 0);
                 const avg = nonZero.length ? nonZero.reduce((a, b) => a + b, 0) / nonZero.length : 0;
                 const prediction = Math.round(avg * 1.05); // 5% growth
                 results[cat] = Array(horizon).fill(prediction);
             }
-            
+
             // Calculate totals
             for (let i = 0; i < horizon; i++) {
                 totalPredictions[i] = Object.values(results).reduce((sum, catArray) => sum + catArray[i], 0);
             }
-            
+
             predictionResult = {
                 categories: results,
                 total: totalPredictions,
-                predictionMethod: 'simple_average'
+                predictionMethod: 'simple_average',
+                used_fallback: true
             };
         }
 
@@ -119,13 +122,19 @@ export async function predict(req, res, next) {
             predictionMethod: method,
         };
 
-        // Store result in Redis cache
-        await redisClient.set(cacheKey, JSON.stringify(result), {
-            EX: 3600 // Cache for 1 hour
-        });
+        const used_fallback = predictionResult.used_fallback === true;
+
+        if (!used_fallback) {
+            console.log(`✅ Caching prediction result with key: ${method}`);
+            await redisClient.set(cacheKey, JSON.stringify(result), {
+                EX: 3600 // Cache for 1 hour
+            });
+        } else {
+            console.warn(`⚠️ Prediction used fallback method (${method}); result not cached.`);
+        }
 
         res.status(200).json(result);
-        
+
     } catch (error) {
         console.error('Prediction error:', error);
         if (error instanceof errorHandler) {
