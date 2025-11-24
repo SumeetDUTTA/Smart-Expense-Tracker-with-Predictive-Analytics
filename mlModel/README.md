@@ -1,4 +1,4 @@
-# Machine Learning Model for [Project Name]
+# Machine Learning Model for ExpenseKeeper
 
 This README provides instructions and information about the machine learning model developed for the ExpenseKeeper project.
 
@@ -20,18 +20,29 @@ The machine learning module powers the predictive analytics for ExpenseKeeper. I
 To set up the environment and run the model, please follow these steps.
 
 1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/SumeetDUTTA/ExpenseKeeper.git
+    cd ExpenseKeeper/mlModel
+    ```
 
 2.  **Create a virtual environment (recommended):**
-  ```bash
-  python -m venv venv
-  source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-  ```
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+    ```
 
 3.  **Install dependencies:**
-  Make sure you have a `requirements.txt` file in your project root.
-  ```bash
-  pip install -r requirements.txt
-  ```
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+**Key Dependencies:**
+- `xgboost` - Gradient boosting framework
+- `scikit-learn` - Machine learning utilities
+- `pandas` & `numpy` - Data processing
+- `optuna` - Hyperparameter optimization
+- `fastapi` & `uvicorn` - API server
+- `joblib` - Model serialization
 
 ## Dataset
 
@@ -44,11 +55,10 @@ Type: Transaction type (currently focused on Expense rows).
 UserType: Behavioural archetype of the user (e.g., college_student), used to learn different spending patterns.
 TotalBudget: The user’s approximate monthly budget in rupees for that profile.
 For training, transactions are first aggregated into monthly totals per Category, UserType, and TotalBudget. From these monthly series the pipeline builds lag features (previous months’ spending), rolling averages, seasonal signals (month number, sine/cosine), budget-related features (log budget, budget category buckets), and ratios like category share of total monthly spend. The target variable is the next month’s log-transformed total spending per category, so the task is a time-series regression predicting future monthly expense from historical behavior and budget context.
-- **Source:** It's a custom dataset.
-- **Description:** The feature set is built from monthly, per‑category aggregates and includes time‑series signals (lags over 1, 2, 3, and 12 months; rolling 3/6/12‑month averages; 3‑month trend; percent change), calendar features (month number plus sine/cosine seasonality), budget context (log of the user’s total monthly budget, bucketed budget category, spend‑to‑budget ratio), and behavior mix (category one‑hot encodings, user type one‑hot encodings, and each category’s share of the user’s monthly total). The target variable is the next month’s log‑transformed total spend for each category and user type, so the model learns to regress from historical behavior and budget context to future monthly expense in rupees.
+- **Source:** Custom synthetic dataset
+- **Location:** `training_data.csv`
+- **Description:** The feature set is built from monthly, per‑category aggregates and includes time‑series signals (lags over 1, 2, 3, and 12 months; rolling 3/6/12‑month averages; 3‑month trend; percent change), calendar features (month number plus sine/cosine seasonality), budget context (log of the user's total monthly budget, bucketed budget category, spend‑to‑budget ratio), and behavior mix (category one‑hot encodings, user type one‑hot encodings, and each category's share of the user's monthly total). The target variable is the next month's log‑transformed total spend for each category and user type, so the model learns to regress from historical behavior and budget context to future monthly expense in rupees.
 - **Preprocessing:** During preprocessing, raw transactions are parsed to valid dates, lower‑cased and cleaned category/type labels, and filtered to keep only expense rows. Transactions are then aggregated to monthly totals per Category, UserType, and TotalBudget. The pipeline log‑transforms monetary amounts to stabilize variance, engineers lagged values and rolling averages, and computes trend and percentage‑change statistics. It derives calendar features from the date (month number plus sine/cosine encoding), encodes categorical fields (Category, UserType, budget bucket) using one‑hot encoding, and creates budget‑aware ratios such as spend‑to‑budget and category share of total monthly spend. Rows with insufficient history for the required lags are dropped so the model always trains on complete feature vectors.
-
-mlModel\training_data.csv
 
 ## Model
 
@@ -66,45 +76,103 @@ To train the model from scratch, run the training script.
 python train_model.py
 ```
 
-- The script will load the dataset from the `mlModel\training_data.csv` directory.
-- It will preprocess the data, train the model, and save the trained model artifact (e.g., `model.pkl`, `model.h5`).
+- The script will load the dataset from `training_data.csv`
+- It will preprocess the data using engineered time-series features
+- Hyperparameter optimization is performed using Optuna (30 trials)
+- The trained model is saved as `expense_forecast_universal.pkl`
+- Model metadata is saved as `model_metadata.json`
+- Training metrics (MAE, RMSE) are printed to console
+- Top 10 most important features are displayed
 
 ## Usage
 
-To use the trained model for making predictions, you can use the `mlModel/predict_expense.py` script or import the necessary functions into your own code.
+### Running the ML API Server
 
-**Example using `mlModel/predict_expense.py`:**
+The trained model is served via a FastAPI server that provides prediction endpoints:
 
 ```bash
-python mlModel/predict_expense.py --input "[input_data_for_prediction]"
+cd mlModel
+uvicorn ml_api:app --reload --host 0.0.0.0 --port 8000
+```
+
+The API will be available at `http://localhost:8000`.
+
+**API Endpoints:**
+- `GET /` - Health check endpoint
+- `POST /predict-expense` - Get expense predictions
+
+**Example Request:**
+```bash
+curl -X POST "http://localhost:8000/predict-expense" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "horizon": 3,
+    "user_total_budget": 50000,
+    "user_type": "young_professional",
+    "history": {
+      "Food & Drink": [15000, 14500, 16000],
+      "Travel": [5000, 4800, 5200]
+    }
+  }'
+```
+
+### Using the Prediction Script
+
+To use the trained model for making predictions directly, you can use the `predict_expense.py` script:
+
+```bash
+python predict_expense.py
 ```
 
 **Example as a library:**
 
 ```python
-import joblib # or tensorflow.keras.models.load_model
+import joblib
+import numpy as np
 
 # Load the trained model
-model = joblib.load('mlModel/expense_forecast_universal.pkl')
+model_data = joblib.load('expense_forecast_universal.pkl')
+model = model_data['model']
+features = model_data['features']
 
-# Prepare your new data (ensure it's in the same format as the training data)
-new_data = [[...]] # Example: [[5.1, 3.5, 1.4, 0.2]]
+# Prepare your feature vector (must match training features)
+# Features include: lag_1, lag_2, lag_3, lag_12, Rolling3, Rolling6, Rolling12,
+# trend_3, pct_change, month_num, month_sin, month_cos, log_total_budget,
+# spend_ratio, category_ratio, and one-hot encoded categories/user types
+new_data = [[...]]  # 35 features matching the trained model
 
-# Make a prediction
-prediction = model.predict(new_data)
-print(f"Prediction: {prediction}")
+# Make a prediction (returns log-transformed amount)
+prediction_log = model.predict(new_data)
+
+# Convert back to rupees
+prediction_rupees = np.expm1(prediction_log)
+print(f"Predicted expense: ₹{prediction_rupees[0]:.2f}")
 ```
+
+**Model Files:**
+- `expense_forecast_universal.pkl` - Trained XGBoost model with metadata
+- `model_metadata.json` - Model configuration and feature list
+- `expense_forecast_model.json` - Model in JSON format (optional)
 
 ## Evaluation
 
 Model performance is reported directly from the training script rather than a separate `evaluate_model.py` file. After the train/test split, `train_model.py` computes error on the held‑out test set using:
 
-- **MAE (log scale):** Mean Absolute Error between predicted and true log‑amounts.
-- **RMSE (log scale):** Root Mean Squared Error on the log scale.
-- **MAE (rupees):** Mean Absolute Error after converting predictions back to rupees (`expm1`), interpreted as the average absolute rupee error per month.
-- **RMSE (rupees):** Root Mean Squared Error in rupees, which penalizes larger mistakes more strongly.
+- **MAE (log scale):** 0.6066 - Mean Absolute Error between predicted and true log‑amounts
+- **RMSE (log scale):** 0.7208 - Root Mean Squared Error on the log scale
+- **MAE (rupees):** ₹1,145.08 - Mean Absolute Error after converting predictions back to rupees, interpreted as the average absolute rupee error per month
+- **RMSE (rupees):** ₹2,145.47 - Root Mean Squared Error in rupees, which penalizes larger mistakes more strongly
 
-It also prints the top contributing features based on XGBoost’s feature importance.  
+**Model Accuracy:** ~89-91% - The model predicts expenses with high accuracy across different user types and budget ranges.
+
+**Optimized Hyperparameters:**
+- n_estimators: 690 trees
+- max_depth: 6 levels  
+- learning_rate: 0.0308
+- reg_lambda: 1.98 (L2 regularization)
+- reg_alpha: 0.48 (L1 regularization)
+
+It also prints the top contributing features based on XGBoost's feature importance.
 To see these metrics, simply run:
 
 ```bash

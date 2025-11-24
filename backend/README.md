@@ -89,7 +89,7 @@ backend/
 
 1.  Clone the repository:
     ```sh
-    git clone https://github.com/SumeetDUTTA/Smart-Expense-Tracker-with-Predictive-Analytics.git
+    git clone https://github.com/SumeetDUTTA/ExpenseKeeper.git
     ```
 2.  Navigate to the backend directory:
     ```sh
@@ -154,7 +154,8 @@ The API server will be available at `http://localhost:5000`.
     -   User submits name, email, password, monthlyBudget
     -   Password hashed with bcrypt (10 salt rounds)
     -   User document created in MongoDB
-    -   Returns user info (no token, must login)
+    -   JWT token generated and returned with user info
+    -   User automatically logged in after registration
 
 2.  **Login** (`POST /api/auth/login`):
     -   User submits email and password
@@ -173,33 +174,28 @@ The API server will be available at `http://localhost:5000`.
 ### Authentication Routes (`/api/auth`)
 
 | Method | Endpoint   | Description          | Auth Required |
-|--------|-----------|----------------------|---------------|
+|--------|------------|----------------------|---------------|
 | POST   | `/register` | Create new user account | No |
 | POST   | `/login`    | Login and get JWT token | No |
 
 ### User Routes (`/api/users`)
 
-| Method | Endpoint   | Description                  | Auth Required |
-|--------|-----------|------------------------------|---------------|
-| GET    | `/profile` | Get current user profile     | Yes |
-| PUT    | `/budget`  | Update monthly budget        | Yes |
-| GET    | `/stats`   | Get user expense statistics  | Yes |
+| Method | Endpoint   | Description                         | Auth Required |
+|--------|------------|-------------------------------------|---------------|
+| GET    | `/profile` | Get current user profile            | Yes |
+| PATCH  | `/profile` | Update user profile                 | Yes |
+| PATCH  | `/meta`    | Update user metadata (budget, type) | Yes |
 
 ### Expense Routes (`/api/expenses`)
 
-| Method | Endpoint       | Description                      | Auth Required |
+| Method | Endpoint      | Description                      | Auth Required |
 |--------|---------------|----------------------------------|---------------|
 | GET    | `/`           | Get all expenses (paginated)     | Yes |
-| GET    | `/:id`        | Get single expense by ID         | Yes |
 | POST   | `/`           | Create new expense               | Yes |
-| PUT    | `/:id`        | Update expense by ID             | Yes |
+| PATCH  | `/:id`        | Update expense by ID             | Yes |
 | DELETE | `/:id`        | Delete expense by ID             | Yes |
-| GET    | `/summary/monthly` | Get monthly expense summary | Yes |
-| GET    | `/summary/category` | Get category-wise totals   | Yes |
 
 **Query Parameters for GET /api/expenses:**
--   `page` (default: 1) - Page number for pagination
--   `limit` (default: 10) - Items per page
 -   `search` - Search in description
 -   `category` - Filter by category
 -   `startDate` - Filter expenses after date (ISO 8601)
@@ -207,28 +203,34 @@ The API server will be available at `http://localhost:5000`.
 
 ### Prediction Routes (`/api/predict`)
 
-| Method | Endpoint   | Description                        | Auth Required |
-|--------|-----------|-----------------------------------|---------------|
-| POST   | `/expense` | Get ML-powered expense prediction | Yes |
+| Method | Endpoint   | Description                       | Auth Required |
+|--------|------------|-----------------------------------|---------------|
+| POST   | `/`        | Get ML-powered expense prediction | Yes |
 
 **Request Body:**
 ```json
 {
-  "user_id": "user_mongo_id",
-  "months_ahead": 3,
-  "monthly_budget": 50000,
-  "spending_behavior": 0.7,
-  "categories": {
-    "Food": 0.3,
-    "Transport": 0.2,
-    "Entertainment": 0.15,
-    "Shopping": 0.15,
-    "Bills": 0.1,
-    "Health": 0.05,
-    "Education": 0.05
-  }
+  "horizonDates": 3,
+  "user_total_budget": 50000,
+  "user_type": "young_professional"
 }
 ```
+
+**Parameters:**
+-   `horizonDates` (number, 1-12, default: 1) - Number of months ahead to predict
+-   `user_total_budget` (number, optional, default: user's monthlyBudget) - Monthly budget amount
+-   `user_type` (string, optional, default: 'college_student') - User archetype for prediction
+
+**Available User Types:**
+-   `college_student`
+-   `young_professional`
+-   `family_moderate`
+-   `family_high`
+-   `luxury_lifestyle`
+-   `senior_retired`
+
+**Response:**
+Returns category-wise expense predictions for the specified time horizon based on user's historical data and ML model forecasting.
 
 ## 🗄️ Database Schema
 
@@ -237,25 +239,38 @@ The API server will be available at `http://localhost:5000`.
 {
   name: String (required, trimmed),
   email: String (required, unique, lowercase),
-  password: String (required, hashed),
+  password: String (required, hashed, minlength: 6),
   monthlyBudget: Number (default: 0),
+  userType: String (enum: ['college_student', 'young_professional', 'family_moderate', 
+                           'family_high', 'luxury_lifestyle', 'senior_retired'], 
+                   default: 'college_student'),
   createdAt: Date (auto),
   updatedAt: Date (auto)
 }
 ```
+
+**Methods:**
+-   `comparePassword(candidatePassword)` - Compares plain text password with hashed password
 
 ### Expense Model
 ```javascript
 {
   user: ObjectId (ref: 'User', required, indexed),
   amount: Number (required, min: 0),
-  category: String (required, enum: [Food, Transport, Entertainment, Shopping, Bills, Health, Education, Other]),
-  description: String (required, maxLength: 500),
-  date: Date (required, indexed),
+  category: String (required, enum: [
+    'Food & Drink', 'Travel', 'Utilities', 'Entertainment', 
+    'Health & Fitness', 'Shopping', 'Rent', 'Other',
+    'Salary', 'Investment', 'Clothing', 'Education', 'Personal Care'
+  ], default: 'Other'),
+  date: Date (required, default: Date.now),
+  note: String (optional, trimmed, default: ''),
   createdAt: Date (auto),
   updatedAt: Date (auto)
 }
 ```
+
+**Indexes:**
+-   Compound index on `user` and `date` for efficient queries
 
 ## 🛡️ Security Features
 
@@ -288,9 +303,13 @@ All errors are handled by the global error handler middleware:
 **Custom ApiError Format:**
 ```javascript
 class ApiError extends Error {
-  constructor(statusCode, message) {
+  constructor(statusCode, message, extra = {}) {
     super(message);
-    this.statusCode = statusCode;
+    this.name = this.constructor.name;
+    this.status = statusCode;           // used by error handler
+    this.statusCode = statusCode;       // used elsewhere
+    this.extra = extra;                 // optional payload
+    Error.captureStackTrace(this, this.constructor);
   }
 }
 ```
@@ -299,8 +318,25 @@ class ApiError extends Error {
 ```json
 {
   "success": false,
-  "error": "Error message here",
-  "stack": "Stack trace (dev mode only)"
+  "message": "Error message here",
+  "details": "Additional error details (dev mode only, ZodError includes validation issues)"
+}
+```
+
+**Example Validation Error (ZodError):**
+```json
+{
+  "success": false,
+  "message": "Validation Error",
+  "details": [
+    {
+      "code": "invalid_type",
+      "expected": "string",
+      "received": "number",
+      "path": ["email"],
+      "message": "Expected string, received number"
+    }
+  ]
 }
 ```
 
@@ -316,7 +352,6 @@ class ApiError extends Error {
 The backend acts as a proxy to the Python ML API with enhanced error handling:
 
 -   **Endpoint:** `POST /api/predict/expense`
--   **Forwards to:** `http://localhost:8000/predict-expense`
 -   **Error Handling:** Catches ML API failures, returns user-friendly errors
 -   **Authentication:** User must be authenticated; user_id injected from JWT token
 -   **Validation:** Request body validated with Zod schema before forwarding
@@ -325,7 +360,7 @@ The backend acts as a proxy to the Python ML API with enhanced error handling:
 
 -   **Sumeet Dutta** - Backend Developer
 -   GitHub: [@SumeetDUTTA](https://github.com/SumeetDUTTA)
--   Project: [Smart-Expense-Tracker-with-Predictive-Analytics](https://github.com/SumeetDUTTA/Smart-Expense-Tracker-with-Predictive-Analytics)
+-   Project: [ExpenseKeeper](https://github.com/SumeetDUTTA/ExpenseKeeper)
 
 ## 📄 License
 
