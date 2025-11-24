@@ -1,10 +1,10 @@
-# Smart Expense Tracker with Predictive Analytics
+# ExpenseKeeper
 
 A full-stack personal finance application that helps users track expenses, visualize spending patterns, and leverage machine learning to predict future monthly expenses across categories. Built with React, Node.js, MongoDB, and XGBoost.
 
 ## Overview
 
-Smart Expense Tracker combines traditional expense management with predictive analytics to provide users with actionable insights about their spending behavior. The platform automatically categorizes transactions, generates visual analytics, and uses a universal XGBoost model to forecast future spending based on historical patterns, budget context, and user profile.
+ExpenseKeeper combines traditional expense management with predictive analytics to provide users with actionable insights about their spending behavior. The platform automatically categorizes transactions, generates visual analytics, and uses a universal XGBoost model to forecast future spending based on historical patterns, budget context, and user profile.
 
 ## Technologies Used
 
@@ -19,18 +19,26 @@ Smart Expense Tracker combines traditional expense management with predictive an
 ```
 ├── backend/           # Express API server
 │   ├── src/
+|   |   ├── config/
 │   │   ├── controllers/
+|   |   ├── middleware/
+|   |   ├── mlService/
 │   │   ├── models/
 │   │   ├── routes/
-│   │   ├── middleware/
+|   |   ├── utils/
+|   |   ├── validators/
 │   │   └── server.js
 │   └── package.json
 ├── frontend/          # React + Vite application
 │   ├── src/
 │   │   ├── components/
-│   │   ├── pages/
 │   │   ├── contexts/
+│   │   ├── lib/
+│   │   ├── pages/
 │   │   ├── styles/
+│   │   ├── App.css
+│   │   ├── App.jsx
+│   │   ├── index.css
 │   │   └── main.jsx
 │   └── package.json
 ├── mlModel/           # Python ML service
@@ -54,8 +62,8 @@ Smart Expense Tracker combines traditional expense management with predictive an
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/SumeetDUTTA/Smart-Expense-Tracker-with-Predictive-Analytics.git
-   cd Smart-Expense-Tracker-with-Predictive-Analytics
+   git clone https://github.com/SumeetDUTTA/ExpenseKeeper.git
+   cd ExpenseKeeper
    ```
 
 2. **Backend Setup:**
@@ -68,6 +76,7 @@ Smart Expense Tracker combines traditional expense management with predictive an
    MONGODB_URI=your_mongodb_connection_string
    JWT_SECRET=your_jwt_secret_key
    PORT=5000
+   ML_API_URL=http://localhost:8000
    ```
 
 3. **Frontend Setup:**
@@ -78,7 +87,6 @@ Smart Expense Tracker combines traditional expense management with predictive an
    Create a `.env` file in `frontend/` with:
    ```
    VITE_API_URL=http://localhost:5000/api
-   VITE_ML_API_URL=http://localhost:8000
    ```
 
 4. **ML Model Setup:**
@@ -161,7 +169,7 @@ The prediction engine uses a universal XGBoost model trained on synthetic transa
 - Behavioral mix: category one-hot encodings, user type encodings, category share of total spend
 
 **Performance:** 
-- Test MAE: ~₹200-400 depending on user profile
+- Test MAE: ~₹800-1000 depending on user profile
 - Handles diverse spending patterns across user types
 - Stable multi-step forecasts with drift correction
 
@@ -181,15 +189,14 @@ See `mlModel/README.md` for detailed ML documentation.
 
 ### ML API (FastAPI)
 - `POST /predict` - Batch category forecast
-- `POST /predict_timeseries` - Single series forecast
 
 ## Development
 
 ### Code Quality
-- Frontend: ESLint, Prettier (configured)
+- Frontend: ESLint
 - Backend: Zod schema validation, error middleware
 - Consistent design tokens across CSS modules
-- Accessible UI with ARIA labels and keyboard navigation
+- Accessible UI with ARIA labels
 
 ### Testing
 Run frontend dev server with hot reload:
@@ -220,5 +227,6 @@ This project is for educational purposes. All rights reserved.
 ---
 
 **Author:** Sumeet Dutta  
-**Repository:** [Smart-Expense-Tracker-with-Predictive-Analytics](https://github.com/SumeetDUTTA/Smart-Expense-Tracker-with-Predictive-Analytics)
+**Repository:** [ExpenseKeeper](https://github.com/SumeetDUTTA/ExpenseKeeper)
+**Website:** (https://expense-keeper-two.vercel.app/)
 

@@ -50,12 +50,14 @@ frontend/
 │   │   ├── ExpenseNotFound.jsx     # 404 component for missing expenses
 │   │   ├── navBar.jsx              # Navigation bar with theme toggle
 │   │   ├── rateLimitedUI.jsx       # Rate limit feedback component
+│   │   ├── popUp.jsx               # To change user budget and user type
 │   │   └── ThemeSwitcher.jsx       # Theme toggle switch component
 │   ├── contexts/            # React Context providers
 │   │   └── authContext.jsx         # Authentication state management
 │   ├── lib/                 # Shared utilities and configurations
 │   │   └── api.js                  # Axios instance with interceptors
 │   ├── pages/               # Page-level components
+│   │   ├── HomePage.jsx            # About the project
 │   │   ├── addExpenses.jsx         # Add new expense page
 │   │   ├── dashboard.jsx           # Main analytics dashboard
 │   │   ├── HomePage.jsx            # Landing page for new users
@@ -63,29 +65,16 @@ frontend/
 │   │   ├── Predict.jsx             # ML prediction interface
 │   │   ├── Profile.jsx             # User profile and settings
 │   │   └── showExpenses.jsx        # Expense list and analytics
-│   ├── styles/              # Component-specific CSS modules
-│   │   ├── AddExpense.css          # Add expense page styles
-│   │   ├── Dashboard.css           # Dashboard page styles
-│   │   ├── ExpenseForm.css         # Expense form component styles
-│   │   ├── homePage.css            # Landing page styles
-│   │   ├── LoginSignup.css         # Login/signup page styles
-│   │   ├── NavBar.css              # Navigation bar styles
-│   │   ├── popUp.css               # Modal/popup styles
-│   │   ├── Predict.css             # Prediction page styles
-│   │   ├── Profile.css             # Profile page styles
-│   │   ├── showExpenses.css        # Expenses list page styles
-│   │   ├── theme.css               # Theme-specific styles
-│   │   └── ThemeSwitcher.css       # Theme toggle component styles
 │   ├── App.jsx              # Main app component with routes
 │   ├── App.css              # Global application styles
 │   ├── index.css            # CSS reset, design tokens, base styles
 │   └── main.jsx             # Application entry point
-├── .gitignore
 ├── eslint.config.js         # ESLint configuration
 ├── index.html               # HTML template
 ├── package.json             # Dependencies and scripts
 ├── postcss.config.js        # PostCSS configuration
 ├── tailwind.config.js       # TailwindCSS configuration
+├── vercel.json              # Vercel Configuration
 ├── vite.config.js           # Vite build configuration
 └── README.md
 
@@ -122,7 +111,6 @@ Follow these instructions to get the frontend running locally.
 
 No `.env` file needed for frontend by default. API URLs are configured in `src/lib/api.js`:
 -   Backend API: `http://localhost:5000/api`
--   ML API: `http://localhost:8000`
 
 To change API endpoints, edit `src/lib/api.js`.
 
@@ -217,4 +205,4 @@ Users can switch between light and dark themes using the sun/moon icon in the na
 
 -   **Sumeet Dutta** - Full-Stack Developer
 -   GitHub: [@SumeetDUTTA](https://github.com/SumeetDUTTA)
--   Project: [Smart-Expense-Tracker-with-Predictive-Analytics](https://github.com/SumeetDUTTA/ExpenseKeeper)
+-   Project: [Smart-Expense-Tracker-with-Predictive-Analytics](https://github.com/SumeetDUTTA/Smart-Expense-Tracker-with-Predictive-Analytics)
