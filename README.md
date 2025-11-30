@@ -6,6 +6,28 @@ A full-stack personal finance application that helps users track expenses, visua
 
 ExpenseKeeper combines traditional expense management with predictive analytics to provide users with actionable insights about their spending behavior. The platform automatically categorizes transactions, generates visual analytics, and uses a universal XGBoost model to forecast future spending based on historical patterns, budget context, and user profile.
 
+## Screenshots
+
+### Dashboard
+![Dashboard Overview](images\Dashbord_1.png)
+![Dashboard Analytics](images\Dashboard_2.png)
+*Main dashboard showing monthly spending trends, category distribution, and analytics*
+
+### Expense Management
+![Expense List](images\Expenses_2.png)
+![Expense Analytics](images\Expenses_1.png)
+![Add Expense](images\Add_Expenses.png)
+*Comprehensive expense tracking with search, filter, and analytics features*
+
+### AI Predictions
+![Prediction Interface](images\Predict_1.png)
+![By Category Predictions](images\Predict_2.png)
+*ML-powered expense forecasting with category-wise breakdown*
+
+### Profile Management
+![Profile Settings](images\Profile.png)
+*User profile customization with budget and preferences*
+
 ## Technologies Used
 
 - **Frontend:** React (Vite), React Router, Recharts, Lucide Icons, React Hot Toast, TailwindCSS, DaisyUI
