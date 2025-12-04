@@ -282,7 +282,7 @@ export default function HomePage() {
         <div className="container">
           <div className="footer-content">
             <div className="footer-section">
-              <h4>Smart Expense Tracker</h4>
+              <h4>ExpenseKeeper</h4>
               <p>AI-powered expense management for smarter financial decisions</p>
             </div>
             <div className="footer-section">
@@ -303,7 +303,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="footer-bottom">
-            <p>&copy; 2025 Smart Expense Tracker. All rights reserved.</p>
+            <p>&copy; 2025 ExpenseKeeper. All rights reserved.</p>
           </div>
         </div>
       </footer>

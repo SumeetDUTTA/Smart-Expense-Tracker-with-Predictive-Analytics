@@ -246,7 +246,7 @@ export default function Login() {
 				<div style={{ textAlign: 'center' }}>
 					<LoaderCircle size={48} className="animate-spin" />
 					<div style={{ marginTop: 8, color: 'var(--muted)' }}>
-						{serverChecking ? 'Checking server status...' : 'Loading Dashboard...'}
+						{serverChecking ? 'Checking server status...' : 'Loading...'}
 					</div>
 				</div>
 			</div>
