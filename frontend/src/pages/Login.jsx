@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
 	UserPlus, Mail, Lock, User, LogIn, Eye, EyeOff,
@@ -28,6 +28,7 @@ const BACKEND_PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%
 export default function Login() {
 	const { login, register, loginWithGoogle, loginWithDiscord } = useAuth();
 	const nav = useNavigate();
+	const googleCallbackProcessed = useRef(false);
 
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
@@ -91,6 +92,9 @@ export default function Login() {
 					window.google.accounts.id.initialize({
 						client_id: GOOGLE_CLIENT_ID,
 						callback: async (response) => {
+							if (googleCallbackProcessed.current) return;
+							googleCallbackProcessed.current = true;
+							
 							try {
 								await loginWithGoogle(response.credential);
 								toast.success("Logged in with Google!");
@@ -98,6 +102,11 @@ export default function Login() {
 							} catch (error) {
 								console.error("Google callback error:", error);
 								toast.error("Google login failed. Please try again.");
+							} finally {
+								// Reset after a delay to allow future logins
+								setTimeout(() => {
+									googleCallbackProcessed.current = false;
+								}, 1000);
 							}
 						},
 						// Use popup mode instead of redirect for better compatibility
