@@ -19,7 +19,66 @@ import { notFound, errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
 
-app.use(helmet());
+// Security headers with Content Security Policy
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          "https://accounts.google.com",
+          "https://challenges.cloudflare.com",
+          ...(isDevelopment ? ["'unsafe-inline'", "'unsafe-eval'"] : [])
+        ],
+        styleSrc: [
+          "'self'",
+          "https://accounts.google.com",
+          ...(isDevelopment ? ["'unsafe-inline'"] : [])
+        ],
+        imgSrc: ["'self'", "data:", "https:"],
+        fontSrc: ["'self'", "data:"],
+        connectSrc: [
+          "'self'",
+          "https://expense-keeper-backend.onrender.com",
+          "https://accounts.google.com",
+          "https://challenges.cloudflare.com",
+          ...(isDevelopment ? ["http://localhost:5173", "ws://localhost:5173"] : [])
+        ],
+        frameSrc: ["https://accounts.google.com", "https://challenges.cloudflare.com"],
+        frameAncestors: ["'self'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        upgradeInsecureRequests: isDevelopment ? [] : [],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+  })
+);
+
+// Add X-Frame-Options header for clickjacking protection
+app.use((req, res, next) => {
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'geolocation=(), camera=(), microphone=(), payment=(), usb=(), magnetometer=(), gyroscope=(), speaker=()');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  
+  // Secure cookie settings - apply to all cookies
+  if (!isDevelopment) {
+    res.setHeader(
+      'Set-Cookie',
+      `${res.getHeader('Set-Cookie') || ''}; Secure; HttpOnly; SameSite=Strict`
+    );
+  }
+  
+  next();
+});
+
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined': 'dev' ));

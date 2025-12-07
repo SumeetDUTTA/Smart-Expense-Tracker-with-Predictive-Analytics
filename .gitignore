@@ -46,3 +46,5 @@ dist-ssr
 *.sw?
 
 client_secret_google.json
+server.js
+vercel.json
