@@ -1,3 +1,4 @@
+/*frontend/src/pages/dashboard.jsx*/
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from "react";
@@ -411,7 +412,7 @@ export default function Dashboard() {
 				</div>
 			</div>
 
-			{/* Stats Cards (unchanged) */}
+			{/* Stats Cards */}
 			<div className="stats-grid" role="list">
 				<div className="card-body stat" role="listitem" aria-label="This month">
 					<div>

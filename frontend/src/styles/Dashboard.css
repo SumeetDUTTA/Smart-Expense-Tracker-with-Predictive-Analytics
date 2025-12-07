@@ -1,4 +1,7 @@
-/* frontend/src/styles/Dashboard.css */
+/* ----------------------------------
+   Dashboard Layout – Cleaned Version
+---------------------------------- */
+
 .page-container {
 	max-width: var(--container-max-width);
 	margin: 28px auto;
@@ -51,6 +54,10 @@
 	box-shadow: var(--shadow-lg);
 }
 
+/* ----------------------------------
+   Cards
+---------------------------------- */
+
 .card-body {
 	background: var(--card-bg);
 	border-radius: var(--card-radius);
@@ -60,62 +67,77 @@
 	transition: all var(--transition-normal);
 }
 
+/* ----------------------------------
+   Statistics Grid
+---------------------------------- */
+
 .stats-grid {
-	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	gap: var(--gap-lg);
-	margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 28px; /* Matches screenshot spacing */
+    margin-bottom: 32px;
+		width: 100%;
 }
 
 .stat {
-	min-height: 100px;
+	min-height: 160px; /* Taller like your screenshot */
+	padding: 22px 24px; /* More breathing room */
+	background: var(--card-bg);
+	border-radius: var(--card-radius);
+	border: 1px solid var(--border-color);
+	box-shadow: var(--shadow-lg); /* Stronger visual lift */
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+	transition: transform 0.25s ease, box-shadow 0.25s ease;
+	width: 100% !important;
 }
 
 .stat:hover {
-	transform: translateY(-6px);
-	box-shadow: var(--shadow-lg);
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-xl);
 }
 
 .stat .label {
-	color: var(--text-secondary);
-	font-size: 13px;
-	margin-bottom: 6px;
-	display: flex;
-	gap: 8px;
-	align-items: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
 }
 
 .stat .amount {
-	font-size: 22px;
-	font-weight: 700;
-	color: var(--text-primary);
-	margin: 0 0 8px 0;
+    font-size: 34px; /* Big and clear */
+    font-weight: 700;
+    margin: 4px 0 6px 0;
+    color: var(--text-primary);
+    letter-spacing: -0.5px; /* cleaner numeric look */
 }
 
 .stat .muted {
-	color: var(--text-secondary);
-	font-size: 13px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: auto;
 }
 
 .change {
-	font-size: 13px;
-	display: inline-flex;
-	gap: 8px;
-	align-items: center;
-	color: var(--text-secondary);
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
 }
 
 .change.increase {
-	color: var(--success);
+    color: var(--success);
 }
 
 .change.decrease {
-	color: var(--danger);
+    color: var(--danger);
 }
+
+/* ----------------------------------
+   Charts Section
+---------------------------------- */
 
 .charts-sections {
 	display: grid;
@@ -164,6 +186,10 @@
 	height: 12px;
 	border-radius: 3px;
 }
+
+/* ----------------------------------
+   Recent Expenses / Top Categories
+---------------------------------- */
 
 .recent-expenses-top-categories-card {
 	display: grid;
@@ -276,6 +302,10 @@
 	font-size: 13px;
 }
 
+/* ----------------------------------
+   Quick Actions
+---------------------------------- */
+
 .quick-action-card {
 	margin-bottom: 20px;
 }
@@ -325,6 +355,10 @@
 	padding: 28px 0;
 }
 
+/* ----------------------------------
+   Loader
+---------------------------------- */
+
 .loader-screen {
 	min-height: 60vh;
 	display: flex;
@@ -342,6 +376,10 @@
 		transform: rotate(360deg);
 	}
 }
+
+/* ----------------------------------
+   Build Button
+---------------------------------- */
 
 .build-button {
 	margin-top: 8px;
@@ -361,7 +399,10 @@
 	box-shadow: var(--shadow-lg);
 }
 
-/* Welcome modal for new users */
+/* ----------------------------------
+   Modal (existing)
+---------------------------------- */
+
 .modal-overlay {
 	position: fixed;
 	inset: 0;
@@ -464,662 +505,127 @@
 	padding: 8px 10px;
 	cursor: pointer;
 	font-weight: 700;
-	/* Patched Dashboard.css — original styles retained, plus ek- modal styles to match Popup component
-   Source: original frontend/src/styles/Dashboard.css (retained) referenced.
-   This file adds ek- prefixed modal styles so popup.jsx (Popup component) uses the same look.
-*/
-
-	.page-container {
-		max-width: var(--container-max-width);
-		margin: 28px auto;
-		padding: var(--container-padding);
-		box-sizing: border-box;
-	}
-
-	.header-row {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		gap: 12px;
-		margin-bottom: 14px;
-	}
-
-	.page-title {
-		font-size: 28px;
-		font-weight: 700;
-		margin: 0;
-		letter-spacing: -0.2px;
-		color: var(--text-primary);
-	}
-
-	.header-meta {
-		color: var(--text-secondary);
-		font-size: 13px;
-	}
-
-	.header-actions {
-		display: flex;
-		gap: 10px;
-	}
-
-	.action-item {
-		display: inline-flex;
-		align-items: center;
-		gap: 8px;
-		padding: 8px 12px;
-		border-radius: var(--button-radius);
-		background: var(--accent-gradient);
-		color: var(--text-secondary);
-		text-decoration: none;
-		font-weight: 700;
-		transition: all var(--transition-fast);
-		box-shadow: var(--shadow-md);
-	}
-
-	.action-item:hover {
-		transform: translateY(-2px);
-		box-shadow: var(--shadow-lg);
-	}
-
-	.card-body {
-		background: var(--card-bg);
-		border-radius: var(--card-radius);
-		padding: 16px;
-		box-shadow: var(--shadow-md);
-		border: 1px solid var(--border-color);
-		transition: all var(--transition-normal);
-	}
-
-	.stats-grid {
-		display: grid;
-		grid-template-columns: repeat(4, 1fr);
-		gap: var(--gap-lg);
-		margin-bottom: 20px;
-	}
-
-	.stat {
-		min-height: 100px;
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		transition: transform var(--transition-normal), box-shadow var(--transition-normal);
-	}
-
-	.stat:hover {
-		transform: translateY(-6px);
-		box-shadow: var(--shadow-lg);
-	}
-
-	.stat .label {
-		color: var(--text-secondary);
-		font-size: 13px;
-		margin-bottom: 6px;
-		display: flex;
-		gap: 8px;
-		align-items: center;
-	}
-
-	.stat .amount {
-		font-size: 22px;
-		font-weight: 700;
-		color: var(--text-primary);
-		margin: 0 0 8px 0;
-	}
-
-	.stat .muted {
-		color: var(--text-secondary);
-		font-size: 13px;
-	}
-
-	.change {
-		font-size: 13px;
-		display: inline-flex;
-		gap: 8px;
-		align-items: center;
-		color: var(--text-secondary);
-	}
-
-	.change.increase {
-		color: var(--success);
-	}
-
-	.change.decrease {
-		color: var(--danger);
-	}
-
-	.charts-sections {
-		display: grid;
-		grid-template-columns: 2fr 1fr;
-		gap: var(--gap-lg);
-		margin-bottom: 18px;
-	}
-
-	.chart-card .card-title {
-		display: flex;
-		gap: 10px;
-		align-items: center;
-		font-size: 16px;
-		margin-bottom: 12px;
-		font-weight: 600;
-		color: var(--text-primary);
-	}
-
-	.pie-chart-container {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 12px;
-		padding: 8px 0;
-	}
-
-	.pie-legend {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
-		justify-content: center;
-		margin-top: 8px;
-	}
-
-	.legend-item {
-		display: flex;
-		gap: 8px;
-		align-items: center;
-		font-size: 13px;
-		color: var(--text-secondary);
-	}
-
-	.legend-color-box {
-		width: 12px;
-		height: 12px;
-		border-radius: 3px;
-	}
-
-	.recent-expenses-top-categories-card {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: var(--gap-lg);
-		margin-bottom: 18px;
-	}
-
-	.expense-item {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 12px;
-		padding: 10px;
-		border-radius: 10px;
-		background: var(--card-hover-bg);
-		margin-bottom: 8px;
-		border: 1px solid var(--border-color);
-		transition: all var(--transition-fast);
-	}
-
-	.expense-item:hover {
-		box-shadow: var(--shadow-md);
-	}
-
-	.expense-info {
-		display: flex;
-		gap: 10px;
-		align-items: center;
-	}
-
-	.expense-category {
-		font-weight: 600;
-		font-size: 14px;
-		color: var(--text-primary);
-		margin: 0;
-	}
-
-	.expense-date-note {
-		font-size: 12px;
-		color: var(--text-secondary);
-		margin: 0;
-	}
-
-	.expense-amount {
-		font-weight: 700;
-		color: var(--text-primary);
-	}
-
-	.top-categories-list {
-		display: flex;
-		flex-direction: column;
-		gap: 10px;
-	}
-
-	.expense-category-item {
-		background: var(--card-hover-bg);
-		padding: 10px;
-		border-radius: 10px;
-		border: 1px solid var(--border-color);
-	}
-
-	.category-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		gap: 10px;
-		margin-bottom: 8px;
-	}
-
-	.expense-category-indicator {
-		width: 14px;
-		height: 14px;
-		border-radius: 4px;
-	}
-
-	.expense-category-name {
-		color: var(--text-primary);
-	}
-
-	.expense-category-amount {
-		font-weight: 700;
-		color: var(--text-primary);
-	}
-
-	.category-progress-bar {
-		display: flex;
-		gap: 8px;
-		align-items: center;
-	}
-
-	.progress-track {
-		width: 100%;
-		height: 10px;
-		background: var(--border-color);
-		border-radius: 999px;
-		overflow: hidden;
-	}
-
-	.progress-fill {
-		height: 100%;
-		width: 0%;
-		border-radius: 999px;
-		background: var(--accent-gradient);
-		transition: width 900ms cubic-bezier(.2, .9, .2, 1);
-	}
-
-	.percentage-text {
-		color: var(--text-secondary);
-		font-size: 13px;
-	}
-
-	.quick-action-card {
-		margin-bottom: 20px;
-	}
-
-	.action-grid {
-		display: grid;
-		grid-template-columns: repeat(4, 1fr);
-		gap: 12px;
-		margin-top: 8px;
-	}
-
-	.action-item {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-		align-items: center;
-		justify-content: center;
-		padding: 12px;
-		border-radius: 12px;
-		text-decoration: none;
-		background: var(--card-bg);
-		border: 1px solid var(--border-color);
-		color: var(--text-primary);
-		font-weight: 600;
-		transition: all var(--transition-normal);
-	}
-
-	.action-item:hover {
-		transform: translateY(-6px);
-		box-shadow: var(--shadow-lg);
-		border-color: var(--accent-primary);
-	}
-
-	.view-all-link {
-		display: inline-flex;
-		gap: 8px;
-		align-items: center;
-		color: var(--accent-primary);
-		font-weight: 600;
-		text-decoration: none;
-		margin-top: 8px;
-	}
-
-	.no-data {
-		text-align: center;
-		color: var(--text-secondary);
-		padding: 28px 0;
-	}
-
-	.loader-screen {
-		min-height: 60vh;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.animate-spin {
-		animation: spin 1s linear infinite;
-		color: var(--accent-primary);
-	}
-
-	@keyframes spin {
-		to {
-			transform: rotate(360deg);
-		}
-	}
-
-	.build-button {
-		margin-top: 8px;
-		padding: 8px 12px;
-		border-radius: 10px;
-		border: none;
-		background: var(--accent-gradient);
-		color: var(--text-primary);
-		font-weight: 600;
-		cursor: pointer;
-		box-shadow: var(--shadow-md);
-		transition: all var(--transition-fast);
-	}
-
-	.build-button:hover {
-		transform: translateY(-2px);
-		box-shadow: var(--shadow-lg);
-	}
-
-	/* Existing modal styles (kept) */
-	.modal-overlay {
-		position: fixed;
-		inset: 0;
-		background: rgba(10, 10, 10, 0.45);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		z-index: 1200;
-		padding: 20px;
-	}
-
-	.modal-card {
-		background: var(--card-bg);
-		border-radius: 12px;
-		padding: 20px;
-		width: 100%;
-		max-width: 640px;
-		box-shadow: var(--shadow-lg);
-		border: 1px solid var(--border-color);
-	}
-
-	.modal-header h3 {
-		margin: 0;
-		font-size: 18px;
-		color: var(--text-primary);
-	}
-
-	.modal-header .muted {
-		color: var(--text-secondary);
-		font-size: 13px;
-	}
-
-	.modal-form {
-		display: flex;
-		flex-direction: column;
-		gap: 12px;
-		margin-top: 12px;
-	}
-
-	.modal-field {
-		display: flex;
-		flex-direction: column;
-		gap: 6px;
-	}
-
-	.modal-label {
-		font-size: 13px;
-		color: var(--text-secondary);
-	}
-
-	.modal-field input,
-	.modal-field select {
-		padding: 10px 12px;
-		border-radius: 8px;
-		border: 1px solid var(--border-color);
-		background: var(--card-hover-bg);
-		color: var(--text-primary);
-		font-size: 14px;
-	}
-
-	.modal-actions {
-		display: flex;
-		gap: 10px;
-		align-items: center;
-		justify-content: flex-end;
-		margin-top: 6px;
-		flex-wrap: wrap;
-	}
-
-	.btn-primary {
-		background: var(--accent-gradient);
-		border: none;
-		padding: 10px 14px;
-		border-radius: 10px;
-		color: var(--text-primary);
-		font-weight: 700;
-		cursor: pointer;
-	}
-
-	.btn-ghost {
-		background: transparent;
-		border: 1px solid var(--border-color);
-		padding: 10px 12px;
-		border-radius: 10px;
-		cursor: pointer;
-	}
-
-	.btn-snooze {
-		background: transparent;
-		color: var(--text-secondary);
-		border: none;
-		padding: 8px 10px;
-		cursor: pointer;
-	}
-
-	.btn-link {
-		background: transparent;
-		color: var(--accent-primary);
-		border: none;
-		padding: 8px 10px;
-		cursor: pointer;
-		font-weight: 700;
-	}
-
-	/* NEW: ek- prefixed modal styles match popup.jsx (kept DRY by mirroring modal styles) */
-	.ek-modal-overlay {
-		position: fixed;
-		inset: 0;
-		background: rgba(10, 10, 10, 0.45);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		z-index: 1200;
-		padding: 20px;
-		-webkit-backdrop-filter: blur(4px);
-		backdrop-filter: blur(4px);
-	}
-
-	.ek-modal-card {
-		background: var(--card-bg);
-		border-radius: 12px;
-		padding: 20px;
-		width: 100%;
-		max-width: 680px;
-		box-shadow: 0 12px 40px rgba(2, 6, 23, 0.35);
-		border: 1px solid var(--border-color);
-	}
-
-	.ek-modal-header h3 {
-		margin: 0;
-		font-size: 1.125rem;
-		font-weight: 700;
-	}
-
-	.ek-muted {
-		color: var(--muted, #6b7280);
-		margin-top: 6px;
-		font-size: 0.94rem;
-	}
-
-	.ek-modal-form {
-		margin-top: 16px;
-		display: grid;
-		gap: 12px;
-	}
-
-	.ek-modal-field {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-	}
-
-	.ek-modal-label {
-		font-size: 0.88rem;
-		color: var(--muted, #6b7280);
-	}
-
-	.ek-modal-field input,
-	.ek-modal-field select {
-		padding: 10px 12px;
-		border-radius: 8px;
-		border: 1px solid var(--border-color);
-		font-size: 0.98rem;
-		outline: none;
-		background: var(--input-bg, #fff);
-		color: var(--text-primary, #111827);
-	}
-
-	.ek-modal-actions {
-		display: flex;
-		gap: 8px;
-		margin-top: 8px;
-		flex-wrap: wrap;
-		justify-content: flex-end;
-	}
-
-	.ek-btn {
-		padding: 8px 12px;
-		border-radius: 8px;
-		font-size: 0.95rem;
-		cursor: pointer;
-		border: 1px solid transparent;
-	}
-
-	.ek-btn-primary {
-		background: var(--accent-primary, #6366f1);
-		color: white;
-		border-color: rgba(0, 0, 0, 0.04);
-	}
-
-	.ek-btn-ghost {
-		background: transparent;
-		color: var(--text-primary, #111827);
-		border-color: var(--border-color, #e6e9ee);
-	}
-
-	.ek-btn-snooze {
-		background: transparent;
-		color: var(--muted, #6b7280);
-		border-color: transparent;
-	}
-
-	.ek-btn-link {
-		background: transparent;
-		color: var(--accent-primary, #6366f1);
-		border: none;
-	}
-
-	@media (max-width: 520px) {
-		.modal-card {
-			max-width: 100%;
-			padding: 16px;
-		}
-
-		.modal-actions {
-			justify-content: stretch;
-		}
-
-		.ek-modal-card {
-			max-width: 100%;
-			padding: 16px;
-		}
-	}
-
-	@media (max-width:1024px) {
-		.stats-grid {
-			grid-template-columns: repeat(2, 1fr);
-		}
-
-		.charts-sections {
-			grid-template-columns: 1fr;
-		}
-
-		.recent-expenses-top-categories-card {
-			grid-template-columns: 1fr;
-		}
-
-		.action-grid {
-			grid-template-columns: repeat(2, 1fr);
-		}
-	}
-
-	@media (max-width:520px) {
-		.stats-grid {
-			grid-template-columns: 1fr;
-		}
-
-		.page-title {
-			font-size: 20px;
-		}
-
-		.header-meta {
-			font-size: 13px;
-		}
-
-		.action-grid {
-			grid-template-columns: repeat(2, 1fr);
-			gap: 10px;
-		}
-	}
-
 }
 
-@media (max-width: 520px) {
-	.modal-card {
-		max-width: 100%;
-		padding: 16px;
-	}
+/* ----------------------------------
+   ek- Modal Styles (Popup Component)
+---------------------------------- */
 
-	.modal-actions {
-		justify-content: stretch;
-	}
+.ek-modal-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(10, 10, 10, 0.45);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1200;
+	padding: 20px;
+	backdrop-filter: blur(4px);
 }
 
+.ek-modal-card {
+	background: var(--card-bg);
+	border-radius: 12px;
+	padding: 20px;
+	width: 100%;
+	max-width: 680px;
+	box-shadow: 0 12px 40px rgba(2, 6, 23, 0.35);
+	border: 1px solid var(--border-color);
+}
 
-@media (max-width: 1024px) {
+.ek-modal-header h3 {
+	margin: 0;
+	font-size: 1.125rem;
+	font-weight: 700;
+}
+
+.ek-muted {
+	color: var(--muted, #6b7280);
+	margin-top: 6px;
+	font-size: 0.94rem;
+}
+
+.ek-modal-form {
+	margin-top: 16px;
+	display: grid;
+	gap: 12px;
+}
+
+.ek-modal-field {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.ek-modal-label {
+	font-size: 0.88rem;
+	color: var(--muted, #6b7280);
+}
+
+.ek-modal-field input,
+.ek-modal-field select {
+	padding: 10px 12px;
+	border-radius: 8px;
+	border: 1px solid var(--border-color);
+	font-size: 0.98rem;
+	background: var(--input-bg, #fff);
+	color: var(--text-primary, #111827);
+}
+
+.ek-modal-actions {
+	display: flex;
+	gap: 8px;
+	margin-top: 8px;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+}
+
+.ek-btn {
+	padding: 8px 12px;
+	border-radius: 8px;
+	font-size: 0.95rem;
+	cursor: pointer;
+	border: 1px solid transparent;
+}
+
+.ek-btn-primary {
+	background: var(--accent-primary, #6366f1);
+	color: white;
+	border-color: rgba(0, 0, 0, 0.04);
+}
+
+.ek-btn-ghost {
+	background: transparent;
+	color: var(--text-primary, #111827);
+	border-color: var(--border-color, #e6e9ee);
+}
+
+.ek-btn-snooze {
+	background: transparent;
+	color: var(--muted, #6b7280);
+	border-color: transparent;
+}
+
+.ek-btn-link {
+	background: transparent;
+	color: var(--accent-primary, #6366f1);
+	border: none;
+}
+
+/* ----------------------------------
+   Responsive
+---------------------------------- */
+
+@media (max-width:1024px) {
 	.stats-grid {
 		grid-template-columns: repeat(2, 1fr);
 	}
-
 	.charts-sections {
 		grid-template-columns: 1fr;
 	}
-
 	.recent-expenses-top-categories-card {
 		grid-template-columns: 1fr;
 	}
-
 	.action-grid {
 		grid-template-columns: repeat(2, 1fr);
 	}
@@ -1129,17 +635,19 @@
 	.stats-grid {
 		grid-template-columns: 1fr;
 	}
-
 	.page-title {
 		font-size: 20px;
 	}
-
-	.header-meta {
-		font-size: 13px;
-	}
-
 	.action-grid {
 		grid-template-columns: repeat(2, 1fr);
 		gap: 10px;
+	}
+	.modal-card,
+	.ek-modal-card {
+		max-width: 100%;
+		padding: 16px;
+	}
+	.modal-actions {
+		justify-content: stretch;
 	}
 }

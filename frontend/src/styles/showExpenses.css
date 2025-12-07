@@ -33,6 +33,7 @@
   gap: var(--gap);
   display: flex;
   flex-direction: column;
+  border-radius: 9px;
 }
 
 .loader-screen {
