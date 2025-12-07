@@ -566,7 +566,7 @@ export default function Login() {
 
 				<footer className="small-footer">
 					<span>Made with ❤️</span>
-					<span className="version">v1.0</span>
+					<span className="version">v1.7</span>
 				</footer>
 
 			</div>
