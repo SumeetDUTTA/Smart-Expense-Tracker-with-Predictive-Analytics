@@ -97,7 +97,6 @@ export default function Login() {
 							
 							try {
 								await loginWithGoogle(response.credential);
-								toast.success("Logged in with Google!");
 								nav("/dashboard");
 							} catch (error) {
 								console.error("Google callback error:", error);
