@@ -2,15 +2,15 @@
 /* Global theme variables for consistent design across all pages */
 
 :root {
-    /* Light theme colors */
-    --bg-primary: #f6f8fb;
-    --bg-secondary: #ffffff;
-    --bg-gradient-start: #fbfdff;
-    --bg-gradient-end: #f6f8fb;
+    /* Light theme colors - softer, less bright */
+    --bg-primary: #dde3ea;
+    --bg-secondary: #eef1f6;
+    --bg-gradient-start: #e5e9ef;
+    --bg-gradient-end: #dde3ea;
 
     --text-primary: #0f172a;
-    --text-secondary: #6b7280;
-    --text-muted: #9ca3af;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
 
     --accent-primary: #6366f1;
     --accent-secondary: #8b5cf6;
@@ -21,17 +21,17 @@
     --warning: #f59e0b;
     --info: #3b82f6;
 
-    --border-color: rgba(15, 23, 42, 0.06);
+    --border-color: rgba(15, 23, 42, 0.1);
     --border-hover: rgba(99, 102, 241, 0.2);
 
-    --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.04);
-    --shadow-md: 0 6px 18px rgba(15, 23, 42, 0.06);
-    --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.08);
-    --shadow-xl: 0 18px 40px rgba(15, 23, 42, 0.12);
+    --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 6px 18px rgba(15, 23, 42, 0.09);
+    --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.12);
+    --shadow-xl: 0 18px 40px rgba(15, 23, 42, 0.16);
 
-    --card-bg: #ffffff;
-    --card-hover-bg: #fafbff;
-    --input-bg: #ffffff;
+    --card-bg: #eef1f6;
+    --card-hover-bg: #e5e9ef;
+    --input-bg: #f8f9fb;
     --input-focus-bg: #ffffff;
 
     --overlay-bg: rgba(3, 7, 18, 0.48);
