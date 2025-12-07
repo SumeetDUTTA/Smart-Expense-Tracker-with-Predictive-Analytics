@@ -406,24 +406,21 @@ export default function Login() {
 
 					</div>
 
-					{/* OAuth buttons */}
-					<div className="oauth-buttons">
-						{/* Temporarily disabled Google OAuth due to configuration issues */}
-						{/* 
-						<button
-							type="button"
-							className="oauth-btn google-btn"
-							onClick={handleGoogleClick}
-							disabled={!googleInitialized}
-						>
-							<FaGoogle size={18} />
-							<span>{mode === "signup" ? "Sign up" : "Log in"} with Google</span>
-						</button>
-						*/}
-						<button type="button" className="oauth-btn discord-btn" onClick={handleDiscordClick}>
-							<FaDiscord size={18} />
-							<span>{mode === "signup" ? "Sign up" : "Log in"} with Discord</span>
-						</button>
+				{/* OAuth buttons */}
+				<div className="oauth-buttons">
+					<button
+						type="button"
+						className="oauth-btn google-btn"
+						onClick={handleGoogleClick}
+						disabled={!googleInitialized}
+					>
+						<FaGoogle size={18} />
+						<span>{mode === "signup" ? "Sign up" : "Log in"} with Google</span>
+					</button>
+					<button type="button" className="oauth-btn discord-btn" onClick={handleDiscordClick}>
+						<FaDiscord size={18} />
+						<span>{mode === "signup" ? "Sign up" : "Log in"} with Discord</span>
+					</button>
 					</div>
 
 					<div className="divider">
