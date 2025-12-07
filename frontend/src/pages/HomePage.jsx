@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import emailjs from '@emailjs/browser';
 
 import { useAuth } from '../contexts/authContext';
+import ThemeSwitcher from '../components/ThemeSwitcher';
 import '../styles/homePage.css';
 
 export default function HomePage() {
@@ -113,6 +114,7 @@ export default function HomePage() {
             <a href="#features" className="nav-link">Features</a>
             <a href="#how-it-works" className="nav-link">How It Works</a>
             <a href="#contact" className="nav-link">Contact</a>
+            <ThemeSwitcher />
             <Link to="/login" className="btn btn-primary">Login</Link>
           </div>
         </nav>
