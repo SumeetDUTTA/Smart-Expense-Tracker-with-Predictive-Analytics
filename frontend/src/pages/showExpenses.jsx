@@ -140,16 +140,32 @@ export default function ShowExpenses() {
 		const now = new Date()
 		let end = customEnd ? parseDate(customEnd) : now
 		if (!end) end = now
+		end = clampDate(end)
 		end.setHours(23, 59, 59, 999)
 
 		let start = null
-		if (customStart) start = parseDate(customStart)
+		if (customStart) {
+			start = parseDate(customStart)
+		}
 		else {
+			const today = clampDate(new Date())
 			switch (preset) {
-				case '1M': start = subMonths(now, 1); break
-				case '3M': start = subMonths(now, 3); break
-				case '6M': start = subMonths(now, 6); break
-				case '1Y': start = subMonths(now, 12); break
+				case '1M':
+					// Current month: from 1st day of current month to today
+					start = new Date(today.getFullYear(), today.getMonth(), 1)
+					break
+				case '3M':
+					// Last 3 months including current month
+					start = new Date(today.getFullYear(), today.getMonth() - 2, 1)
+					break
+				case '6M':
+					// Last 6 months including current month
+					start = new Date(today.getFullYear(), today.getMonth() - 5, 1)
+					break
+				case '1Y':
+					// Last 12 months including current month
+					start = new Date(today.getFullYear(), today.getMonth() - 11, 1)
+					break
 				case 'All':
 				default:
 					{

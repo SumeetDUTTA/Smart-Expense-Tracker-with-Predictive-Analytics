@@ -203,8 +203,15 @@
 .stat {
     display: flex;
     flex-direction: column;
+    padding-bottom: 5px;
+    width: 120px;
+    border-radius: 9px;
     align-items: center;
     color: white;
+}
+
+.stat.track {
+    width: 140px;
 }
 
 .stat-number {
@@ -216,6 +223,7 @@
 .stat-label {
     font-size: 0.95rem;
     opacity: 0.95;
+
 }
 
 /* Section styles */
@@ -253,7 +261,7 @@ section {
     gap: var(--gap-lg);
     max-width: var(--container-max-width);
     margin: 0 auto;
-    padding: 0 var(--container-padding);
+    padding: 7px var(--container-padding);
 }
 
 .feature-card {
@@ -304,7 +312,7 @@ section {
     flex-wrap: wrap;
     max-width: var(--container-max-width);
     margin: 0 auto;
-    padding: 0 var(--container-padding);
+    padding: 7px var(--container-padding);
 }
 
 .step-card {
@@ -366,7 +374,7 @@ section {
     gap: var(--gap-lg);
     max-width: var(--container-max-width);
     margin: 0 auto;
-    padding: 0 var(--container-padding);
+    padding: 7px var(--container-padding);
 }
 
 .experience-item {
@@ -437,7 +445,7 @@ section {
     gap: var(--gap-lg);
     max-width: var(--container-max-width);
     margin: 0 auto;
-    padding: 0 var(--container-padding);
+    padding: 7px var(--container-padding);
 }
 
 .tech-card {
@@ -514,6 +522,10 @@ section {
     position: relative;
 }
 
+.cta-section .container{
+   padding-bottom: 7px;
+}
+
 /* Footer */
 .footer {
     background: var(--bg-secondary);
@@ -528,7 +540,7 @@ section {
     gap: 2rem;
     margin-bottom: 2rem;
     max-width: var(--container-max-width);
-    padding: 0 var(--container-padding);
+    padding: 7px var(--container-padding);
 }
 
 .footer-section h4 {
@@ -562,6 +574,10 @@ section {
 
 .footer-section ul li a:hover {
     color: #667eea;
+}
+
+.footer-bottom {
+    padding-bottom: 7px;
 }
 
 /* Contact Section */
@@ -641,6 +657,7 @@ section {
     border-radius: var(--card-radius);
     box-shadow: var(--card-shadow);
     border: 1px solid var(--border-color);
+    margin-bottom: 7px;
 }
 
 .contact-form {
@@ -701,6 +718,7 @@ section {
     opacity: 0.6;
     cursor: not-allowed;
 }
+
 
 .footer-bottom {
     text-align: center;

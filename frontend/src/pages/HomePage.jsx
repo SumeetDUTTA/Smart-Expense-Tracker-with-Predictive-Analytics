@@ -131,7 +131,7 @@ export default function HomePage() {
               <span className="stat-number">Smart</span>
               <span className="stat-label">AI Predictions</span>
             </div>
-            <div className="stat">
+            <div className="stat track">
               <span className="stat-number">Easy</span>
               <span className="stat-label">Expense Tracking</span>
             </div>
