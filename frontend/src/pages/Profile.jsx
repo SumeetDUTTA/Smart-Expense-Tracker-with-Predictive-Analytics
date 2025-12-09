@@ -270,19 +270,21 @@ export default function Profile() {
 								/>
 							</div>
 
-							<div className="monthly-budget-field">
-								<label className="monthly-budget-label">
-									Email Address
-								</label>
-								<input
-									type="email"
-									placeholder="Enter your email"
-									value={email}
-									onChange={(e) => setEmail(e.target.value)}
-									className="monthly-budget-input"
-									required
-								/>
-							</div>
+							{profile?.authProvider === 'local' && (
+								<div className="monthly-budget-field">
+									<label className="monthly-budget-label">
+										Email Address
+									</label>
+									<input
+										type="email"
+										placeholder="Enter your email"
+										value={email}
+										onChange={(e) => setEmail(e.target.value)}
+										className="monthly-budget-input"
+										required
+									/>
+								</div>
+							)}
 
 							<div className="budget-form-actions">
 								<button type="submit" className="budget-form-submit">
