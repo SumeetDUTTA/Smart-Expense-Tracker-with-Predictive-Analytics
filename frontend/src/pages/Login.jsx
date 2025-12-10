@@ -365,9 +365,9 @@ export default function Login() {
 		return (
 			<div className="loader-screen" role="status" aria-live="polite" style={{ 
 				display: 'flex', 
-				justifyContent: 'center', 
-				alignItems: 'center', 
-				minHeight: '100vh' 
+				justifyContent: 'center',
+				alignItems: 'center',
+				minHeight: '100vh'
 			}}>
 				<div style={{ textAlign: 'center' }}>
 					<LoaderCircle size={48} className="animate-spin" />
